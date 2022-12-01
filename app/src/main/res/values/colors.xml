@@ -9,10 +9,10 @@
     <color name="secondaryDarkColor">#519657</color>
 
     <color name="primaryTextColor">#000000</color>
-    <color name="secondaryTextColor">#555555</color>
+    <color name="secondaryTextColor">#666666</color>
 
     <color name="primaryBackgroundColor">#FFFFFF</color>
-    <color name="secondaryBackgroundColor">#B5B5B5</color>
+    <color name="secondaryBackgroundColor">#EAEAEA</color>
 
     <color name="black">#000000</color>
     <color name="gray">#666666</color>
