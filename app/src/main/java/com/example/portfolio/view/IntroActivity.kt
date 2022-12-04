@@ -9,6 +9,8 @@ import com.example.portfolio.databinding.ActivityIntroBinding
 
 
 class IntroActivity : AppCompatActivity() {
+    private var nextFlag = false // 연속 클릭으로 인한 중복 실행 방지
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = ActivityIntroBinding.inflate(layoutInflater)
@@ -17,17 +19,19 @@ class IntroActivity : AppCompatActivity() {
         binding.nextTextView.startAnimation(getBlinkAnimation())
 
         binding.root.setOnClickListener {
-            nextSplashActivity()
+            if(!nextFlag){
+                nextFlag = true
+                nextSplashActivity()
+            }
         }
     }
 
     private fun getBlinkAnimation(): AlphaAnimation =
         AlphaAnimation(0.0f, 1.0f).apply {
-            val anim = AlphaAnimation(0.0f, 1.0f)
-            anim.duration = 400
-            anim.startOffset = 100
-            anim.repeatMode = Animation.REVERSE
-            anim.repeatCount = Animation.INFINITE
+            duration = 400
+            startOffset = 100
+            repeatMode = Animation.REVERSE
+            repeatCount = Animation.INFINITE
         }
 
     private fun nextSplashActivity(){

@@ -19,8 +19,14 @@ abstract class BaseFragment<T: ViewDataBinding>(@LayoutRes private val layoutId:
         savedInstanceState: Bundle?
     ): View? {
         _binding = DataBindingUtil.inflate(inflater, layoutId, container, false)
+        initView()
+        initData()
+        initListener()
         return binding.root
     }
+    protected abstract fun initView()
+    protected open fun initData() {}
+    protected abstract fun initListener()
 
     override fun onDestroyView() {
         super.onDestroyView()

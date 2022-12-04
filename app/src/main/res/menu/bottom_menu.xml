@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/page_project"
+        android:enabled="true"
+        android:icon="@drawable/ic_diy"
+        android:title="@string/tab_project"/>
+
+    <item
+        android:id="@+id/page_portfolio"
+        android:enabled="false"
+        android:title=" "/>
+
+    <item
+        android:id="@+id/page_qna"
+        android:enabled="true"
+        android:icon="@drawable/ic_qna"
+        android:title="@string/tab_qna"/>
+</menu>
