@@ -1,4 +1,4 @@
-package com.example.portfolio.base
+package com.worldonetop.portfolio.base
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp

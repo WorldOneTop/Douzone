@@ -1,11 +1,11 @@
-package com.example.portfolio.view
+package com.worldonetop.portfolio.view
 
 import android.content.Intent
 import android.os.Bundle
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import androidx.appcompat.app.AppCompatActivity
-import com.example.portfolio.databinding.ActivityIntroBinding
+import com.worldonetop.portfolio.databinding.ActivityIntroBinding
 
 
 class IntroActivity : AppCompatActivity() {

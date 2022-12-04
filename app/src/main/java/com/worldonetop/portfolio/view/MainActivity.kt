@@ -1,14 +1,13 @@
-package com.example.portfolio.view
+package com.worldonetop.portfolio.view
 
 import android.graphics.Color
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
-import com.example.portfolio.R
-import com.example.portfolio.databinding.ActivityMainBinding
+import com.worldonetop.portfolio.R
+import com.worldonetop.portfolio.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -61,10 +60,10 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> { // 서랍 버튼
-                if(binding.drawerLayout.isDrawerOpen(GravityCompat.START))
-                    binding.drawerLayout.closeDrawer(GravityCompat.START)
+                if(binding.rootLayout.isDrawerOpen(GravityCompat.START))
+                    binding.rootLayout.closeDrawer(GravityCompat.START)
                 else
-                    binding.drawerLayout.openDrawer(GravityCompat.START)
+                    binding.rootLayout.openDrawer(GravityCompat.START)
                 true
             }
             else -> super.onOptionsItemSelected(item)

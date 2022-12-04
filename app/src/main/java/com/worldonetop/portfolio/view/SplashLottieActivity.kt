@@ -1,9 +1,9 @@
-package com.example.portfolio.view
+package com.worldonetop.portfolio.view
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.example.portfolio.databinding.ActivitySplashLottieBinding
+import com.worldonetop.portfolio.databinding.ActivitySplashLottieBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

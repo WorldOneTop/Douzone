@@ -1,15 +1,12 @@
-package com.example.portfolio.view
+package com.worldonetop.portfolio.view
 
-import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.portfolio.R
-import com.example.portfolio.base.BaseFragment
-import com.example.portfolio.databinding.FragmentPortfolioBinding
-import com.example.portfolio.databinding.RowBinding
+import com.worldonetop.portfolio.R
+import com.worldonetop.portfolio.base.BaseFragment
+import com.worldonetop.portfolio.databinding.FragmentPortfolioBinding
+import com.worldonetop.portfolio.databinding.RowBinding
 
 
 class PortfolioFragment : BaseFragment<FragmentPortfolioBinding>(R.layout.fragment_portfolio) {
