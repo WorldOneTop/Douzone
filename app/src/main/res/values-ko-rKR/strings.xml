@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">스마트 포트폴리오</string>
     <string name="tab_portfolio">이력서</string>
-    <string name="tab_project">프로젝트</string>
+    <string name="tab_activity">활동</string>
     <string name="tab_qna">문답</string>
 
 </resources>

@@ -2,10 +2,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/page_project"
+        android:id="@+id/page_activity"
         android:enabled="true"
         android:icon="@drawable/ic_diy"
-        android:title="@string/tab_project"/>
+        android:title="@string/tab_activity"/>
 
     <item
         android:id="@+id/page_portfolio"
