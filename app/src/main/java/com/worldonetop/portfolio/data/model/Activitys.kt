@@ -1,8 +1,10 @@
 package com.worldonetop.portfolio.data.model
 
+import android.annotation.SuppressLint
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.worldonetop.portfolio.util.ActivityType
+import java.text.SimpleDateFormat
 import java.util.*
 
 @Entity
@@ -17,4 +19,9 @@ data class Activitys(
     var files:List<String>? = null // 관련 파일
 ){
     @PrimaryKey(autoGenerate = true) var activityId: Int = 0
+
+    companion object{
+        @SuppressLint("SimpleDateFormat")
+        val dateFormat = SimpleDateFormat("yy.MM.dd")
+    }
 }

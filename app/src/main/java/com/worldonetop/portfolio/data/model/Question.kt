@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-class Question(
+data class Question(
     var question:String,
     var answer:String,
     var like:Boolean = false,

@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.main.PortfolioFragment">
+    tools:context=".view.main.PortfolioFragment"
+    android:paddingBottom="56dp"
+    android:id="@+id/rvPortfolio"
+    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+    android:background="@color/secondaryBackgroundColor">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
-</FrameLayout>
+</androidx.recyclerview.widget.RecyclerView>
 </layout>

@@ -20,6 +20,7 @@
         android:text="화면을 터치하여 시작하세요"
         android:textSize="18sp"
         android:gravity="center"
+        android:textColor="@color/primaryTextColor"
         android:layout_marginVertical="32dp"
         android:layout_weight="1"
         android:layout_width="wrap_content"

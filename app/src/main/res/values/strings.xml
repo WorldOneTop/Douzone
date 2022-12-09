@@ -3,4 +3,21 @@
     <string name="tab_portfolio">Resume</string>
     <string name="tab_activity">Activity</string>
     <string name="tab_qna">Q&amp;A</string>
+
+    <string name="menu_search">search</string>
+    <string name="menu_add">add</string>
+    <string name="menu_remove">remove</string>
+
+    <string name="add_activity_title">Enter a title</string>
+    <string name="add_question">Enter a question</string>
+    <string name="add_answer">Please enter an answer</string>
+    <string name="add_file">Add file</string>
+    <string name="add_content">Enter additional content.</string>
+
+
+    <string name="start_date">Start date</string>
+    <string name="end_date">End date</string>
+    <string name="submit">submit</string>
+    <string name="save">save</string>
+
 </resources>
