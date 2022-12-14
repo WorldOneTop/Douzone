@@ -57,6 +57,7 @@
 
                     <Spinner
                         android:id="@+id/category"
+                        android:transitionName="category"
                         android:selectedItemPosition="@={vm.activityData.type + 1}"
                         android:enabled="@{vm.editMode}"
                         android:layout_width="wrap_content"
@@ -72,14 +73,14 @@
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/title"
-                            android:text="@={vm.activityData.title}"
-                            android:enabled="@{vm.editMode}"
+                            android:transitionName="title"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:enabled="@{vm.editMode}"
                             android:hint="@string/add_activity_title"
                             android:inputType="textMultiLine"
                             android:padding="12dp"
-                            android:textColor="@color/primaryTextColor"
+                            android:text="@={vm.activityData.title}"
                             android:textSize="16sp"
                             tools:ignore="LabelFor" />
                     </com.google.android.material.textfield.TextInputLayout>
@@ -98,6 +99,7 @@
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/startDate"
+                                android:transitionName="startDate"
                                 android:text="@{vm.startDate}"
                                 android:enabled="@{vm.editMode}"
                                 android:layout_width="match_parent"
@@ -124,6 +126,7 @@
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/endDate"
+                                android:transitionName="endDate"
                                 android:text="@{vm.endDate}"
                                 android:enabled="@{vm.editMode}"
                                 android:layout_width="match_parent"
@@ -147,6 +150,7 @@
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/content"
+                            android:transitionName="content"
                             android:text="@={vm.activityData.content}"
                             android:hint="@string/add_content"
                             android:enabled="@{vm.editMode}"
@@ -155,7 +159,6 @@
                             android:inputType="textMultiLine"
                             android:minLines="3"
                             android:padding="12dp"
-                            android:textColor="@color/primaryTextColor"
                             android:textSize="16sp"
                             tools:ignore="LabelFor" />
                     </com.google.android.material.textfield.TextInputLayout>

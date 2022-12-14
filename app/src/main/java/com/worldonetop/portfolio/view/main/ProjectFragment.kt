@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -29,6 +30,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import androidx.core.util.Pair as UtilPair
 
 @AndroidEntryPoint
 class ProjectFragment : BaseFragment<FragmentPagerBinding>(R.layout.fragment_pager) {
@@ -47,9 +49,20 @@ class ProjectFragment : BaseFragment<FragmentPagerBinding>(R.layout.fragment_pag
     override fun initData() {
         // paging adapter
         rvAdapter = ProjectAdapter(
-            { // item click
-                if(!rvAdapter.isSelectedMode())
-                    startActivity(Intent(activity,DetailProjectActivity::class.java).putExtra("data",it))
+            { data, view -> // item click
+                if(!rvAdapter.isSelectedMode()){
+                    val p1 = UtilPair.create<View,String>(view.category,view.category.transitionName)
+                    val p2 = UtilPair.create<View,String>(view.title,view.title.transitionName)
+                    val p3 = UtilPair.create<View,String>(view.content,view.content.transitionName)
+                    val p4 = UtilPair.create<View,String>(view.startDate,view.startDate.transitionName)
+                    val p5 = UtilPair.create<View,String>(view.endDate,view.endDate.transitionName)
+                    startActivity(
+                        Intent(activity,DetailProjectActivity::class.java)
+                            .putExtra("data",data),
+                        ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), p1, p2, p3, p4, p5)
+                            .toBundle()
+                    )
+                }
 
             },{ // item selected mode
                 viewModel.selectMode.value = it
@@ -73,6 +86,10 @@ class ProjectFragment : BaseFragment<FragmentPagerBinding>(R.layout.fragment_pag
         viewModel.activitysData.observe(viewLifecycleOwner) {
             lifecycleScope.launch {
                 rvAdapter.submitData(it)
+                if(rvAdapter.itemCount == 0)
+                    binding.divider.visibility = View.GONE
+                else
+                    binding.divider.visibility = View.VISIBLE
             }
         }
 
@@ -122,7 +139,7 @@ class ProjectFragment : BaseFragment<FragmentPagerBinding>(R.layout.fragment_pag
 }
 
 
-class ProjectAdapter(private val clickListener:(data:Activitys)->Unit,
+class ProjectAdapter(private val clickListener:(data:Activitys, View:RowProjectBinding)->Unit,
                      private val selectedModeListener:(isSelectedMode:Boolean)->Unit,
                      private val likeListener:(data:Activitys)->Unit,) :
     PagingDataAdapter<Activitys, ProjectAdapter.ProjectVH>(
@@ -170,8 +187,8 @@ class ProjectAdapter(private val clickListener:(data:Activitys)->Unit,
         return ProjectVH(
             RowProjectBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false
-            ), { data, selected ->
-                clickListener(data)
+            ), { data, selected, view ->
+                clickListener(data, view)
                 if(!viewMode &&selectedIds.isNotEmpty() && selected != null){
                     if(selected)
                         addSelectedId(data.activityId)
@@ -194,7 +211,7 @@ class ProjectAdapter(private val clickListener:(data:Activitys)->Unit,
 
     inner class ProjectVH(
         private val binding: RowProjectBinding,
-        private val clickListener:(data:Activitys, isSelect:Boolean?)->Unit,
+        private val clickListener:(data:Activitys, isSelect:Boolean?, view:RowProjectBinding)->Unit,
         private val longClickListener:(data:Activitys)->Unit,
         private val likeListener:(data:Activitys)->Unit,
         ) : RecyclerView.ViewHolder(binding.root){
@@ -225,7 +242,7 @@ class ProjectAdapter(private val clickListener:(data:Activitys)->Unit,
                         isSelect = !isSelect !!
                         setSelectedLayout(isSelect!!)
                     }
-                    clickListener(it, isSelect)
+                    clickListener(it, isSelect, binding)
                 }
                 binding.root.setOnLongClickListener{_ ->
                     longClickListener(it)

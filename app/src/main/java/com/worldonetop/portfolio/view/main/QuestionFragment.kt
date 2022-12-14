@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -24,6 +25,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import androidx.core.util.Pair as UtilPair
 
 @AndroidEntryPoint
 class QuestionFragment : BaseFragment<FragmentPagerBinding>(R.layout.fragment_pager) {
@@ -40,10 +42,17 @@ class QuestionFragment : BaseFragment<FragmentPagerBinding>(R.layout.fragment_pa
     override fun initData() {
         // paging adapter
         rvAdapter = QuestionAdapter(
-            { // item click
-                if(!rvAdapter.isSelectedMode())
-                    startActivity(Intent(activity,DetailQuestionActivity::class.java).putExtra("data",it))
-
+            { data, view ->// item click
+                if(!rvAdapter.isSelectedMode()){
+                    val p1 = UtilPair.create<View,String>(view.question,view.question.transitionName)
+                    val p2 = UtilPair.create<View,String>(view.answer,view.answer.transitionName)
+                    startActivity(
+                        Intent(activity,DetailQuestionActivity::class.java)
+                            .putExtra("data",data),
+                        ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), p1, p2)
+                            .toBundle()
+                    )
+                }
             },{ // item selected mode
                 viewModel.selectMode.value = it
 
@@ -104,9 +113,11 @@ class QuestionFragment : BaseFragment<FragmentPagerBinding>(R.layout.fragment_pa
 }
 
 
-class QuestionAdapter(private val clickListener:(data:Question)->Unit,
-                      private val selectedModeListener:(isSelectedMode:Boolean)->Unit,
-                      private val likeListener:(data:Question)->Unit,) :
+class QuestionAdapter(
+    private val clickListener: (data: Question, view: RowQuestionBinding) -> Unit,
+    private val selectedModeListener: (isSelectedMode: Boolean) -> Unit,
+    private val likeListener: (data: Question) -> Unit,
+) :
     PagingDataAdapter<Question, QuestionAdapter.QuestionVH>(
         object: DiffUtil.ItemCallback<Question>(){
             override fun areItemsTheSame(oldItem: Question, newItem: Question): Boolean {
@@ -154,8 +165,8 @@ class QuestionAdapter(private val clickListener:(data:Question)->Unit,
         return QuestionVH(
             RowQuestionBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false
-            ), { data, selected ->
-                clickListener(data)
+            ), { data, selected, v ->
+                clickListener(data, v)
                 if(!viewMode &&selectedIds.isNotEmpty() && selected != null){
                     if(selected)
                         addSelectedId(data.questionId)
@@ -178,7 +189,7 @@ class QuestionAdapter(private val clickListener:(data:Question)->Unit,
 
     inner class QuestionVH(
         private val binding: RowQuestionBinding,
-        private val clickListener:(data:Question, isSelect:Boolean?)->Unit,
+        private val clickListener:(data:Question, isSelect:Boolean?, view:RowQuestionBinding)->Unit,
         private val longClickListener:(data:Question)->Unit,
         private val likeListener:(data:Question)->Unit,
         ) : RecyclerView.ViewHolder(binding.root) {
@@ -202,7 +213,7 @@ class QuestionAdapter(private val clickListener:(data:Question)->Unit,
                         isSelect = !isSelect !!
                         setSelectedLayout(isSelect!!)
                     }
-                    clickListener(it, isSelect)
+                    clickListener(it, isSelect, binding)
                 }
                 binding.root.setOnLongClickListener{ _ ->
                     longClickListener(it)

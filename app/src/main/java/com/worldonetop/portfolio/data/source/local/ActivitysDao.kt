@@ -7,13 +7,13 @@ import com.worldonetop.portfolio.data.model.Activitys
 @Dao
 interface ActivitysDao {
 
-    @Query("SELECT * FROM Activitys ORDER BY endDate DESC, startDate DESC, activityId ASC")
+    @Query("SELECT * FROM Activitys ORDER BY startDate DESC, endDate DESC, activityId ASC")
     fun getActivitysAll(): PagingSource<Int, Activitys>
 
-    @Query("SELECT * FROM Activitys WHERE title LIKE :query  ORDER BY endDate DESC, startDate DESC, activityId ASC")
+    @Query("SELECT * FROM Activitys WHERE title LIKE :query  ORDER BY startDate DESC, endDate DESC, activityId ASC")
     fun getActivitysQuery(query: String): PagingSource<Int, Activitys>
 
-    @Query("SELECT * FROM Activitys WHERE activityId IN (:idList)  ORDER BY endDate DESC, startDate DESC, activityId ASC")
+    @Query("SELECT * FROM Activitys WHERE activityId IN (:idList)  ORDER BY startDate DESC, endDate DESC, activityId ASC")
     fun getActivitysQuery(idList: List<Int>): PagingSource<Int, Activitys>
 
     @Query("SELECT * FROM Activitys WHERE activityId IN (:idList)")

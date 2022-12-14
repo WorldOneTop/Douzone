@@ -8,6 +8,7 @@
     android:orientation="vertical"
     android:background="@drawable/background_round_top"
     android:paddingVertical="12dp"
+    android:minHeight="200dp"
     android:layout_marginTop="200dp"
     app:behavior_hideable="true"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">

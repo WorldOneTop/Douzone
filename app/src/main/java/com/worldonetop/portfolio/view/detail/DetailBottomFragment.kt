@@ -105,21 +105,23 @@ class DetailBottomFragment: BaseFragment<FragmentDetailBottomBinding>(R.layout.f
             } // End - bottom adapter setting (File)
             Type.ACTIVITYS.ordinal ->{ // Start - bottom adapter setting (Activitys)
                 projectAdapter = ProjectAdapter(
-                    { // item click
+                    { data, _ ->// item click
                         viewModel.editMode.value?.let { editMode ->
                             if(editMode){
-                                if(!projectAdapter.isSelectedMode()) // long click 없이 바로 추가 할 수 있게
-                                    projectAdapter.startSelectedMode(listOf(it.activityId))
-
-                                // 선택 or 해제된 데이터 동기화
-                                if(projectAdapter.isSelected(it.activityId) == true){
-                                    viewModel.portfolioData.activity.add(it.activityId)
-                                }else if(projectAdapter.isSelected(it.activityId) == false){
-                                    viewModel.portfolioData.activity.remove(it.activityId)
+                                // 선택 or 해제될 데이터 동기화
+                                if(projectAdapter.isSelected(data.activityId) == true){
+                                    viewModel.portfolioData.activity.remove(data.activityId)
+                                }else{
+                                    viewModel.portfolioData.activity.add(data.activityId)
                                 }
+
+                                // long click 없이 바로 추가 할 수 있게
+                                if(!projectAdapter.isSelectedMode())
+                                    projectAdapter.startSelectedMode(listOf(data.activityId))
+
                             }
                             else{
-                                startActivity(Intent(activity,DetailProjectActivity::class.java).putExtra("data",it))
+                                startActivity(Intent(activity,DetailProjectActivity::class.java).putExtra("data",data))
                             }
                         }
                     },{ // item selected mode
@@ -130,21 +132,22 @@ class DetailBottomFragment: BaseFragment<FragmentDetailBottomBinding>(R.layout.f
             } // End - bottom adapter setting (Activitys)
             Type.QUESTIONS.ordinal ->{ // Start - bottom adapter setting (Question)
                 questionAdapter = QuestionAdapter(
-                    { // item click
+                    { data, _ ->// item click
                         viewModel.editMode.value?.let { editMode ->
                             if(editMode){
-                                if(!questionAdapter.isSelectedMode()) // long click 없이 바로 추가 할 수 있게
-                                    questionAdapter.startSelectedMode(listOf(it.questionId))
-
                                 // 선택 or 해제된 데이터 동기화
-                                if(questionAdapter.isSelected(it.questionId) == true){
-                                    viewModel.portfolioData.question.add(it.questionId)
-                                }else if(questionAdapter.isSelected(it.questionId) == false){
-                                    viewModel.portfolioData.question.remove(it.questionId)
+                                if(questionAdapter.isSelected(data.questionId) == true){
+                                    viewModel.portfolioData.question.remove(data.questionId)
+                                }else{
+                                    viewModel.portfolioData.question.add(data.questionId)
                                 }
+                                // long click 없이 바로 추가 할 수 있게
+                                if(!questionAdapter.isSelectedMode())
+                                    questionAdapter.startSelectedMode(listOf(data.questionId))
+
                             }
                             else{
-                                startActivity(Intent(activity,DetailQuestionActivity::class.java).putExtra("data",it))
+                                startActivity(Intent(activity,DetailQuestionActivity::class.java).putExtra("data",data))
                             }
                         }
                     },{ // item selected mode
@@ -169,11 +172,15 @@ class DetailBottomFragment: BaseFragment<FragmentDetailBottomBinding>(R.layout.f
                     projectAdapter.viewMode = !it
                     if(it)
                         projectAdapter.startSelectedMode(viewModel.portfolioData.activity)
+                    else
+                        projectAdapter.endSelectedMode()
                 }
                 Type.QUESTIONS.ordinal->{
                     questionAdapter.viewMode = !it
                     if(it)
                         questionAdapter.startSelectedMode(viewModel.portfolioData.question)
+                    else
+                        questionAdapter.endSelectedMode()
                 }
             }
         }

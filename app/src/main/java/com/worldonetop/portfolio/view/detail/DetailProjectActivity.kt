@@ -100,7 +100,13 @@ class DetailProjectActivity : BaseActivity<ActivityDetailProjectBinding>(R.layou
                 val pDay: Int = calendar.get(Calendar.DAY_OF_MONTH) //일
                 DatePickerDialog(
                     this, { _, year, month, day ->
-                        val date = "${year % 100}.${month + 1}.$day"
+                        val date = "${
+                            (year % 100).toString().padStart(2,'0')
+                        }.${
+                            (month + 1).toString().padStart(2,'0')
+                        }.${
+                            (day).toString().padStart(2,'0')
+                        }"
                         viewModel.setStartDate(date)
                     }, pYear, pMonth, pDay // 초기 날짜 설정
                 ).show()
@@ -113,7 +119,13 @@ class DetailProjectActivity : BaseActivity<ActivityDetailProjectBinding>(R.layou
                 val pMonth: Int = calendar.get(Calendar.MONTH) //월
                 val pDay: Int = calendar.get(Calendar.DAY_OF_MONTH) //일
                 DatePickerDialog(this, { _, year, month, day -> // return listener
-                    val date = "${year % 100}.${month + 1}.$day"
+                    val date = "${
+                        (year % 100).toString().padStart(2,'0')
+                    }.${
+                        (month + 1).toString().padStart(2,'0')
+                    }.${
+                        (day).toString().padStart(2,'0')
+                    }"
                     viewModel.setEndDate(date)
                 }, pYear, pMonth, pDay // 초기 날짜 설정
                 ).show()
@@ -123,18 +135,11 @@ class DetailProjectActivity : BaseActivity<ActivityDetailProjectBinding>(R.layou
         // open bottom sheet
         binding.links.setOnClickListener{
             changeBottomFragment(bottomLinks)
-
-            // 두 레이아웃 간 높이 차 때문에 새로고침 개념
-            BottomSheetBehavior.from(binding.bottomSheet).state = BottomSheetBehavior.STATE_HIDDEN
-            BottomSheetBehavior.from(binding.bottomSheet).state = BottomSheetBehavior.STATE_EXPANDED
-
+            BottomSheetBehavior.from(binding.bottomSheet).state = BottomSheetBehavior.STATE_HALF_EXPANDED
         }
         binding.files.setOnClickListener{
             changeBottomFragment(bottomFiles)
-
-            // 두 레이아웃 간 높이 차 때문에 새로고침 개념
-            BottomSheetBehavior.from(binding.bottomSheet).state = BottomSheetBehavior.STATE_HIDDEN
-            BottomSheetBehavior.from(binding.bottomSheet).state = BottomSheetBehavior.STATE_EXPANDED
+            BottomSheetBehavior.from(binding.bottomSheet).state = BottomSheetBehavior.STATE_HALF_EXPANDED
         }
     }
     private fun formCheck():Boolean{
@@ -216,4 +221,9 @@ class DetailProjectActivity : BaseActivity<ActivityDetailProjectBinding>(R.layou
         }
     }
 
+    override fun onBackPressed() {
+        super.onBackPressed()
+        if(intent.getBooleanExtra("slideAin",false))
+            overridePendingTransition(R.anim.fadein, R.anim.slide_right)
+    }
 }

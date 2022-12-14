@@ -24,6 +24,7 @@
 
             <TextView
                 android:id="@+id/startDate"
+                android:transitionName="startDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
@@ -49,6 +50,7 @@
 
             <TextView
                 android:id="@+id/endDate"
+                android:transitionName="endDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
@@ -67,9 +69,10 @@
                 android:layout_height="16dp"
                 android:layout_marginStart="82.5dp"
                 android:background="@drawable/background_circle"
-                app:layout_constraintBottom_toBottomOf="@id/tilde"
+                app:layout_constraintBottom_toBottomOf="@id/startDate"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@id/tilde" />
+                app:layout_constraintTop_toTopOf="@id/startDate"
+                android:layout_marginBottom="5dp"/>
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardView"
@@ -91,6 +94,7 @@
 
                     <TextView
                         android:id="@+id/category"
+                        android:transitionName="category"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
@@ -112,6 +116,7 @@
 
                     <TextView
                         android:id="@+id/title"
+                        android:transitionName="title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_columnSpan="2"
@@ -124,6 +129,7 @@
 
                     <TextView
                         android:id="@+id/content"
+                        android:transitionName="content"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_columnSpan="2"

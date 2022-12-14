@@ -65,6 +65,7 @@
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/title"
+                            android:transitionName="title"
                             android:text="@={vm.portfolioData.title}"
                             android:hint="@string/add_file"
                             android:focusableInTouchMode="false"
@@ -72,7 +73,6 @@
                             android:layout_height="match_parent"
                             android:inputType="none"
                             android:padding="12dp"
-                            android:textColor="@color/primaryTextColor"
                             android:textSize="16sp"
                             tools:ignore="LabelFor" />
                     </com.google.android.material.textfield.TextInputLayout>
@@ -85,6 +85,7 @@
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/content"
+                            android:transitionName="content"
                             android:text="@={vm.portfolioData.content}"
                             android:hint="@string/add_content"
                             android:enabled="@{vm.editMode}"
@@ -93,7 +94,6 @@
                             android:inputType="textMultiLine"
                             android:minLines="3"
                             android:padding="12dp"
-                            android:textColor="@color/primaryTextColor"
                             android:textSize="16sp"
                             tools:ignore="LabelFor" />
                     </com.google.android.material.textfield.TextInputLayout>

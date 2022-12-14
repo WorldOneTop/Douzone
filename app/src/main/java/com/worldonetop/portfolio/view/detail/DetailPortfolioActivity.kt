@@ -35,7 +35,7 @@ class DetailPortfolioActivity : BaseActivity<ActivityDetailPortfolioBinding>(R.l
     private lateinit var bottomQuestions:DetailBottomFragment
 
     private lateinit var getFileLauncher: ActivityResultLauncher<String>
-
+    private var changedFile = false
 
     override fun initData() {
         // set view model data
@@ -57,10 +57,11 @@ class DetailPortfolioActivity : BaseActivity<ActivityDetailPortfolioBinding>(R.l
                 CoroutineScope(Dispatchers.IO).launch {
                     try{
                         val fileName = fileUtil.downloadFile(it,FileUtil.Companion.Type.Cache) ?: throw Exception()
-                        if(fileName != binding.title.text.toString())
+                        if(fileName != binding.title.text.toString() && binding.title.toString().isNotBlank())
                             viewModel.removeFiles.add(binding.title.text.toString())
 
                         withContext(Dispatchers.Main){ // 저장한 파일 이름 표시 및 데이터로 저장
+                            changedFile = true
                             loadingDialog.dismiss()
                             viewModel.portfolioData.title = fileName
                             binding.title.setText(fileName)
@@ -127,18 +128,11 @@ class DetailPortfolioActivity : BaseActivity<ActivityDetailPortfolioBinding>(R.l
         // open bottom sheet
         binding.activitys.setOnClickListener{
             changeBottomFragment(bottomActivitys)
-
-            // 두 레이아웃 간 높이 차 때문에 새로고침 개념
-            BottomSheetBehavior.from(binding.bottomSheet).state = BottomSheetBehavior.STATE_HIDDEN
-            BottomSheetBehavior.from(binding.bottomSheet).state = BottomSheetBehavior.STATE_EXPANDED
-
+            BottomSheetBehavior.from(binding.bottomSheet).state = BottomSheetBehavior.STATE_HALF_EXPANDED
         }
         binding.quetions.setOnClickListener{
             changeBottomFragment(bottomQuestions)
-
-            // 두 레이아웃 간 높이 차 때문에 새로고침 개념
-            BottomSheetBehavior.from(binding.bottomSheet).state = BottomSheetBehavior.STATE_HIDDEN
-            BottomSheetBehavior.from(binding.bottomSheet).state = BottomSheetBehavior.STATE_EXPANDED
+            BottomSheetBehavior.from(binding.bottomSheet).state = BottomSheetBehavior.STATE_HALF_EXPANDED
         }
     }
     private fun formCheck():Boolean{
@@ -153,7 +147,8 @@ class DetailPortfolioActivity : BaseActivity<ActivityDetailPortfolioBinding>(R.l
         loadingDialog.show()
         CoroutineScope(Dispatchers.IO).launch{
             try{
-                fileUtil.moveCacheTo(FileUtil.Companion.Type.Resume, fromName = listOf(viewModel.portfolioData.title))
+                if(changedFile)
+                    fileUtil.moveCacheTo(FileUtil.Companion.Type.Resume, fromName = listOf(viewModel.portfolioData.title))
 
                 // 삭제할 파일이 있으면
                 if(viewModel.removeFiles.isNotEmpty()){
@@ -169,6 +164,7 @@ class DetailPortfolioActivity : BaseActivity<ActivityDetailPortfolioBinding>(R.l
                 viewModel.portfolioData.portfolioId = repository.getLastPortfolioId()
 
                 withContext(Dispatchers.Main){
+                    changedFile = false
                     Toast.makeText(this@DetailPortfolioActivity, getString(R.string.save_complete),Toast.LENGTH_SHORT).show()
                     viewModel.setEditMode(false)
                     loadingDialog.dismiss()
@@ -198,5 +194,11 @@ class DetailPortfolioActivity : BaseActivity<ActivityDetailPortfolioBinding>(R.l
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        if(intent.getBooleanExtra("slideAin",false))
+            overridePendingTransition(R.anim.fadein, R.anim.slide_right)
     }
 }

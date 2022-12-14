@@ -21,9 +21,9 @@
 
     <color name="point1">#315430</color>
     <color name="point2">#697245</color>
-    <color name="point3">#918D7F</color>
+    <color name="point3">#856400</color>
     <color name="point4">#82381E</color>
-    <color name="point5">#82381E</color>
+    <color name="point5">#8C8E80</color>
     <color name="point6">#5B717C</color>
     <array name="activityCategoryColor">
         <item>@color/point1</item>

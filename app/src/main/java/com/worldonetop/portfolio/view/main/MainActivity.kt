@@ -197,7 +197,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main){
             }
             R.id.menu_add -> {
                 doubleClick.run {
-                    startActivity(convertDetailActivityIntent())
+                    startActivity(
+                        convertDetailActivityIntent().putExtra("slideAin",true)
+                    )
+                    overridePendingTransition( R.anim.slide_left, R.anim.fadeout)
                 }
                 true
             }

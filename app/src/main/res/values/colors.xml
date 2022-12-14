@@ -23,7 +23,7 @@
     <color name="point2">#AFBF73</color>
     <color name="point3">#F2B84B</color>
     <color name="point4">#D95E32</color>
-    <color name="point5">#D95E32</color>
+    <color name="point5">#C9CCB8</color>
     <color name="point6">#99BDCF</color>
     <array name="activityCategoryColor">
         <item>@color/point1</item>

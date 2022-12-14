@@ -22,6 +22,7 @@
 
             <TextView
                 android:id="@+id/question"
+                android:transitionName="question"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/chat_bubble_left"
@@ -60,6 +61,7 @@
 
             <TextView
                 android:id="@+id/answer"
+                android:transitionName="answer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"

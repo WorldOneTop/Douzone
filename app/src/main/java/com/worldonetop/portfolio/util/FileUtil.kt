@@ -50,6 +50,7 @@ class FileUtil @Inject constructor(@ApplicationContext private val context: Cont
         // 복붙
         context.contentResolver.openInputStream(originUri)?.use { inputStream ->
             try {
+                Files.deleteIfExists(absolutePath)
                 Files.copy(inputStream, absolutePath, StandardCopyOption.REPLACE_EXISTING)
             } catch (e: Exception){
                 inputStream.close()

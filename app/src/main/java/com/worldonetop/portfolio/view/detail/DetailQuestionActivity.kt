@@ -103,4 +103,9 @@ class DetailQuestionActivity : BaseActivity<ActivityDetailQuestionBinding>(R.lay
             else -> super.onOptionsItemSelected(item)
         }
     }
+    override fun onBackPressed() {
+        super.onBackPressed()
+        if(intent.getBooleanExtra("slideAin",false))
+            overridePendingTransition(R.anim.fadein, R.anim.slide_right)
+    }
 }

@@ -5,7 +5,9 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
+import androidx.core.util.Pair
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
@@ -27,6 +29,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import androidx.core.util.Pair as UtilPair
 
 @AndroidEntryPoint
 class PortfolioFragment : BaseFragment<FragmentPagerBinding>(R.layout.fragment_pager) {
@@ -45,9 +48,17 @@ class PortfolioFragment : BaseFragment<FragmentPagerBinding>(R.layout.fragment_p
     override fun initData() {
         // paging adapter
         rvAdapter = PortfolioAdapter(
-            { // item click
-                if(!rvAdapter.isSelectedMode())
-                    startActivity(Intent(activity,DetailPortfolioActivity::class.java).putExtra("data",it))
+            { data, view ->// item click
+                if(!rvAdapter.isSelectedMode()) {
+                    val p1 = UtilPair.create<View,String>(view.fileName,view.fileName.transitionName)
+                    val p2 = UtilPair.create<View,String>(view.content,view.content.transitionName)
+                    startActivity(
+                        Intent(activity,DetailPortfolioActivity::class.java)
+                            .putExtra("data",data),
+                        ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), p1, p2)
+                            .toBundle()
+                    )
+                }
             },{ // item selected mode
                 viewModel.selectMode.value = it
             },{ // like click
@@ -117,7 +128,7 @@ class PortfolioFragment : BaseFragment<FragmentPagerBinding>(R.layout.fragment_p
 }
 
 
-class PortfolioAdapter(private val clickListener:(data:Portfolio)->Unit,
+class PortfolioAdapter(private val clickListener:(data:Portfolio, view:RowPortfolioBinding)->Unit,
                        private val selectedModeListener:(isSelectedMode:Boolean)->Unit,
                        private val likeListener:(data:Portfolio)->Unit,) :
     PagingDataAdapter<Portfolio, PortfolioAdapter.PortfolioVH>(
@@ -166,8 +177,8 @@ class PortfolioAdapter(private val clickListener:(data:Portfolio)->Unit,
         return PortfolioVH(
             RowPortfolioBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false
-            ), { data, selected ->
-                clickListener(data)
+            ), { data, selected, view ->
+                clickListener(data, view)
                 if(!viewMode && selectedIds.isNotEmpty() && selected != null){
                     if(selected)
                         addSelectedId(data.portfolioId)
@@ -190,7 +201,7 @@ class PortfolioAdapter(private val clickListener:(data:Portfolio)->Unit,
 
     inner class PortfolioVH(
         private val binding: RowPortfolioBinding,
-        private val clickListener:(data:Portfolio, isSelect:Boolean?)->Unit,
+        private val clickListener:(data:Portfolio, isSelect:Boolean?, view:RowPortfolioBinding)->Unit,
         private val longClickListener:(data:Portfolio)->Unit,
         private val likeListener:(data:Portfolio)->Unit,
         ) : RecyclerView.ViewHolder(binding.root){
@@ -212,7 +223,7 @@ class PortfolioAdapter(private val clickListener:(data:Portfolio)->Unit,
                         isSelect = !isSelect !!
                         setSelectedLayout(isSelect!!)
                     }
-                    clickListener(it, isSelect)
+                    clickListener(it, isSelect, binding)
                 }
                 binding.root.setOnLongClickListener{_ ->
                     longClickListener(it)
