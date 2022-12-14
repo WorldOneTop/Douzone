@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@drawable/background_round_top"
+    android:paddingVertical="12dp"
+    android:layout_marginTop="200dp"
+    app:behavior_hideable="true"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+    <View
+        android:layout_width="200dp"
+        android:layout_height="3.5dp"
+        android:background="@drawable/background_round"
+        android:backgroundTint="@color/secondaryTextColor"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="24dp"/>
+
+    <Button
+        android:id="@+id/add"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:text="@string/menu_add"
+        android:paddingVertical="12dp"
+        android:layout_marginHorizontal="24dp"
+        android:textSize="17sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvBtm"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:minHeight="250dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        android:paddingBottom="18dp"/>
+</LinearLayout>
+</layout>

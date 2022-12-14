@@ -14,10 +14,34 @@
     <string name="add_file">Add file</string>
     <string name="add_content">Enter additional content.</string>
 
+    <string name="add_files">Related files</string>
+    <string name="add_links">Related Links</string>
+    <string name="add_activity">Related activity</string>
+    <string name="add_qna">Related Q&amp;A</string>
 
+    <string name="web_select_app">Open as app</string>
+    <string name="web_select_browser">Open with browser</string>
+
+    <string name="error_no_input">This field is required.</string>
+    <string name="error_save">Save failed for unknown reason.</string>
+    <string name="error_check_internet">Please check your internet.</string>
+    <string name="error_bad_url">Invalid URL.</string>
+    <string name="error_connect_unknown">Connection failed for unknown reason.</string>
+
+    <string name="category">category</string>
     <string name="start_date">Start date</string>
     <string name="end_date">End date</string>
     <string name="submit">submit</string>
+    <string name="edit">edit</string>
     <string name="save">save</string>
+    <string name="save_complete">Save complete.</string>
 
+    <string-array name="activityCategoryString">
+        <item>Outside activities</item>
+        <item>Project</item>
+        <item>Career</item>
+        <item>Awards</item>
+        <item>Qualifications and Licenses</item>
+        <item>Other</item>
+    </string-array>
 </resources>

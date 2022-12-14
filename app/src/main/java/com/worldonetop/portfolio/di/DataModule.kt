@@ -19,7 +19,7 @@ object RepositoryModule {
     @Provides
     fun provideRepository(
         db: AppDatabase,
-    ): Repository = RepositoryImpl(db.activityDao(), db.portfolioDao(), db.questionDao())
+    ): Repository = RepositoryImpl(db)
 }
 
 @Module

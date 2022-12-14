@@ -1,86 +1,118 @@
 package com.worldonetop.portfolio.data.source
 
+import androidx.lifecycle.LiveData
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.liveData
 import com.worldonetop.portfolio.data.model.Activitys
 import com.worldonetop.portfolio.data.model.Portfolio
-import com.worldonetop.portfolio.data.model.PortfolioDetail
 import com.worldonetop.portfolio.data.model.Question
-import com.worldonetop.portfolio.data.source.local.ActivitysDao
-import com.worldonetop.portfolio.data.source.local.PortfolioDao
-import com.worldonetop.portfolio.data.source.local.QuestionDao
-import kotlinx.coroutines.flow.Flow
+import com.worldonetop.portfolio.data.source.local.AppDatabase
 
-class RepositoryImpl(private val activitysDao: ActivitysDao,private val portfolioDao: PortfolioDao,private val questionDao: QuestionDao):Repository  {
+class RepositoryImpl(private val db:AppDatabase):Repository  {
+    private val config = PagingConfig(
+        initialLoadSize = 20,
+        pageSize = 20,
+        prefetchDistance = 15,
+        maxSize = 100,
+        enablePlaceholders = false,
+    )
 
-    override suspend fun getActivitys(): Flow<PagingData<Activitys>> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = 30,
-                enablePlaceholders = false,
-                maxSize = 100
-            )
-        ) {activitysDao.getActivitys()}.flow
-    }
-    override suspend fun getPortfolio(): Flow<PagingData<Portfolio>> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = 30,
-                enablePlaceholders = false,
-                maxSize = 100
-            )
-        ) {portfolioDao.getPortfolio()}.flow
-    }
-    override suspend fun getQuestions(): Flow<PagingData<Question>> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = 30,
-                enablePlaceholders = false,
-                maxSize = 100
-            )
-        ) {questionDao.getQuestions()}.flow
-    }
-    override suspend fun getDetailActivity(id: Int):Activitys {
-        return activitysDao.getDetailActivity(id)
+    /** Questions */
+    override fun getQuestionAll(): LiveData<PagingData<Question>> {
+        return Pager(config) {
+            db.questionDao().getQuestionAll()
+        }.liveData
     }
 
-    override suspend fun getDetailPortfolio(id: Int):PortfolioDetail {
-        val portfolio = portfolioDao.getDetailPortfolio(id)
-        return PortfolioDetail(
-            portfolio,
-            activitysDao.getListActivitys(portfolio.activity),
-            questionDao.getListQuestion(portfolio.question),
-        )
+    override fun getQuestionQuery(query: String): LiveData<PagingData<Question>> {
+        return Pager(config) {
+            db.questionDao().getQuestionQuery("%$query%")
+        }.liveData
+    }
+    override fun getQuestionQuery(idList: List<Int>): LiveData<PagingData<Question>> {
+        return Pager(config) {
+            db.questionDao().getQuestionSelected(idList)
+        }.liveData
     }
 
-    override suspend fun addActivity(data: Activitys){
-        activitysDao.addActivity(data)
-    }
-    override suspend fun addPortfolio(data: Portfolio){
-        portfolioDao.addPortfolio(data)
-    }
+
     override suspend fun addQuestion(data: Question){
-        questionDao.addQuestion(data)
+        db.questionDao().addQuestion(data)
     }
 
-    override suspend fun updateActivity(data: Activitys){
-        activitysDao.updateActivity(data)
+    override suspend fun updateQuestion(data: Question){
+        db.questionDao().updateQuestion(data)
+    }
+
+    override suspend fun removeQuestion(idList:List<Int>){
+        db.questionDao().removeQuestion(idList)
+    }
+
+    /** Portfolios */
+    override fun getPortfolioAll(): LiveData<PagingData<Portfolio>> {
+        return Pager(config) {
+            db.portfolioDao().getPortfolioAll()
+        }.liveData
+    }
+
+    override fun getPortfolioQuery(query: String): LiveData<PagingData<Portfolio>> {
+        return Pager(config) {
+            db.portfolioDao().getPortfolioQuery("%$query%")
+        }.liveData
+    }
+    override suspend fun getPortfolioSelected(idList: List<Int>): List<Portfolio> {
+        return db.portfolioDao().getPortfolioSelected(idList)
+    }
+
+    override suspend fun getLastPortfolioId(): Int {
+        return db.portfolioDao().getLastId()
+    }
+
+    override suspend fun addPortfolio(data: Portfolio){
+        db.portfolioDao().addPortfolio(data)
     }
     override suspend fun updatePortfolio(data: Portfolio){
-        portfolioDao.updatePortfolio(data)
+        db.portfolioDao().updatePortfolio(data)
     }
-    override suspend fun updateQuestion(data: Question){
-        questionDao.updateQuestion(data)
+    override suspend fun removePortfolio(idList:List<Int>){
+        db.portfolioDao().removePortfolio(idList)
     }
 
-    override suspend fun removeActivity(data: Activitys){
-        activitysDao.removeActivity(data)
+
+    /** Activitys */
+    override fun getActivitysAll(): LiveData<PagingData<Activitys>> {
+        return Pager(config) {
+            db.activityDao().getActivitysAll()
+        }.liveData
     }
-    override suspend fun removePortfolio(data: Portfolio){
-        portfolioDao.removePortfolio(data)
+    override fun getActivitysQuery(query: String): LiveData<PagingData<Activitys>> {
+        return Pager(config) {
+            db.activityDao().getActivitysQuery("%$query%")
+        }.liveData
     }
-    override suspend fun removeQuestion(data: Question){
-        questionDao.removeQuestion(data)
+    override fun getActivitysQuery(idList: List<Int>): LiveData<PagingData<Activitys>> {
+        return Pager(config) {
+            db.activityDao().getActivitysQuery(idList)
+        }.liveData
+    }
+    override suspend fun getActivitysSelected(idList: List<Int>): List<Activitys> {
+        return db.activityDao().getActivitysSelected(idList)
+    }
+
+    override suspend fun getLastActivitysId(): Int {
+        return db.activityDao().getLastId()
+    }
+
+    override suspend fun addActivitys(data: Activitys){
+        db.activityDao().addActivity(data)
+    }
+
+    override suspend fun updateActivitys(data: Activitys){
+        db.activityDao().updateActivity(data)
+    }
+    override suspend fun removeActivitys(idList:List<Int>){
+        db.activityDao().removeActivity(idList)
     }
 }

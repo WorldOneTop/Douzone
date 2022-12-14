@@ -1,71 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    app:cardCornerRadius="8dp"
-    app:cardUseCompatPadding="true"
-    app:cardElevation="6dp"
-    app:cardBackgroundColor="@color/primaryBackgroundColor">
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:padding="12dp"
-        android:baselineAligned="false">
+    xmlns:tools="http://schemas.android.com/tools">
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:layout_height="match_parent"
-            android:layout_marginTop="14dp">
-            <TextView
-                android:id="@+id/fileName"
-                tools:text="삼성 지원한 이력서.pdf"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:textSize="19sp"/>
-            <TextView
-                android:id="@+id/content"
-                android:layout_marginTop="8dp"
-                android:layout_marginHorizontal="8dp"
-                tools:text="뭐 부가적으로 할 말\n할 말\n할 말\n할 말\n"
-                android:maxLines="3"
-                android:ellipsize="end"
+    <data>
+
+        <variable
+            name="data"
+            type="com.worldonetop.portfolio.data.model.Portfolio" />
+    </data>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/rootLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="16sp"/>
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:gravity="center">
+                app:cardBackgroundColor="@color/primaryBackgroundColor"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="6dp"
+                app:cardUseCompatPadding="true">
 
-            <ImageView
-                android:id="@+id/like"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="end"
-                android:contentDescription="like"
-                tools:src="@drawable/empty_star" />
-            <Button
-                android:id="@+id/btnActivity"
-                android:text="@string/tab_activity"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_marginTop="8dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-            <Button
-                android:id="@+id/btnQna"
-                android:text="@string/tab_qna"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-        </LinearLayout>
-    </LinearLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
 
-</androidx.cardview.widget.CardView>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:baselineAligned="false"
+                        android:orientation="horizontal"
+                        android:padding="12dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginTop="14dp"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/fileName"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_columnWeight="1"
+                                android:text="@{data.title}"
+                                android:textSize="19sp"
+                                tools:text="삼성 지원한 이력서.pdf" />
+
+                            <TextView
+                                android:id="@+id/content"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginHorizontal="8dp"
+                                android:layout_marginTop="8dp"
+                                android:ellipsize="end"
+                                android:maxLines="3"
+                                android:text="@{data.content}"
+                                android:textSize="16sp"
+                                tools:text="뭐 부가적으로 할 말\n할 말\n할 말\n할 말\n" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:id="@+id/like"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_gravity="end"
+                                android:contentDescription="like"
+                                app:tint="@color/primaryTextColor"
+                                tools:src="@drawable/empty_star" />
+
+                        </LinearLayout>
+                    </LinearLayout>
+                </FrameLayout>
+
+            </androidx.cardview.widget.CardView>
+        </FrameLayout>
+
+        <include android:id="@+id/selectLayout"
+            layout="@layout/row_frame_select" />
+    </FrameLayout>
+</layout>

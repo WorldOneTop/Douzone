@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="170dp"
+    android:background="@drawable/background_round"
+    android:orientation="horizontal"
+    android:gravity="center">
+
+    <LinearLayout
+        android:id="@+id/webViewSelectedApp"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:gravity="center">
+        <ImageView
+            android:src="@mipmap/ic_launcher_foreground"
+            android:layout_width="100dp"
+            android:layout_height="100dp"/>
+        <TextView
+            android:text="@string/web_select_app"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/webViewSelectedBrowser"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:gravity="center">
+        <ImageView
+            android:src="@drawable/chrome"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_margin="20dp"/>
+        <TextView
+            android:text="@string/web_select_browser"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+</LinearLayout>

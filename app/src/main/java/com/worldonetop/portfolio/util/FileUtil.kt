@@ -7,22 +7,34 @@ import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import android.provider.OpenableColumns
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
-import kotlin.io.path.pathString
+import javax.inject.Inject
 
 
-class FileUtil(private val BASE_PATH: String, private val context: Context) {
 
+class FileUtil @Inject constructor(@ApplicationContext private val context: Context) {
+    companion object{
+        enum class Type{
+            Cache, Resume, Activity
+            // 임시, 이력서, 활동들
+        }
+        val BASE_PATH = "download/SmartPortfolio/"
+    }
     // 공용 저장소에서 가져온 파일을 따로 저장하기 위해서(viewer 때문에 공용 저장소에 보관)
     // originUri - getContent intent 로 가져온 uri
-    // activityId - Activity 탭에 속할 ID or 이력서파일(null) => 디렉토리 구분해서 다른 활동안의 파일 이름과 중복 할수있게
-    // return - sucess("확장자를 포함한 파일명") or fail(null)
-    fun downloadFile(originUri: Uri, activityId:Int?):String?{
+    // type - 상위 디렉토리 구분
+    // id - 필요할 경우 db id 별로 구분해서 저장
+    // return - success("확장자를 포함한 파일명") or fail(null)
+    suspend fun downloadFile(originUri: Uri, type:Type, id: Int? = null):String?{
         // 디렉토리 구분 및 생성
-        val pathStr = converterBaseUrl(activityId)
+        val pathStr = converterBaseUrl(type, id)
         Environment.getExternalStoragePublicDirectory(pathStr).mkdirs()
 
         // 파일 명 및 위치 확정
@@ -41,19 +53,47 @@ class FileUtil(private val BASE_PATH: String, private val context: Context) {
                 Files.copy(inputStream, absolutePath, StandardCopyOption.REPLACE_EXISTING)
             } catch (e: Exception){
                 inputStream.close()
+                Files.deleteIfExists(absolutePath)
                 e.printStackTrace()
                 return null
             }
 
             inputStream.close()
         }
-        return absolutePath.pathString
+        return absolutePath.fileName.toString()
+    }
+    // 해당 파일 부분 삭제
+    suspend fun removeFile(fileName: List<String>, type: Type, id: Int?=null){
+        val path = Environment.getExternalStoragePublicDirectory(converterBaseUrl(type, id)).toString()+"/"
+        for(name in fileName){
+            File(path+ name).apply {
+                if(exists())
+                    delete()
+            }
+        }
+    }
+    // 저장할 캐시 폴더를 저장할 위치로
+    suspend fun moveCacheTo(typeTo: Type,fromName:List<String>, idTo: Int?=null){
+        withContext(Dispatchers.IO) {
+            val newFolder = File(Environment.getExternalStoragePublicDirectory(converterBaseUrl(typeTo, idTo)).toString())
+            if(newFolder.isFile)
+                newFolder.parentFile?.mkdirs()
+            else
+                newFolder.mkdirs()
+
+            val olderBase = Environment.getExternalStoragePublicDirectory(converterBaseUrl(Type.Cache)).path+"/"
+            val newBase = Environment.getExternalStoragePublicDirectory(converterBaseUrl(typeTo, idTo)).path+"/"
+            for(fn in fromName){
+                Files.copy(Paths.get(olderBase+fn), Paths.get(newBase+fn), StandardCopyOption.REPLACE_EXISTING)
+                File(olderBase+fn).delete()
+            }
+        }
     }
 
 
-    // 해당 파일 명과 id(activity 만)를 받아서 actionView intent 리턴, null - no search file
-    fun openFileIntent(fileName: String, activityId: Int?):Intent? {
-        val uri= pathToUri(fileName, activityId) ?: return null
+    // 해당 파일 명과 구분값을 받아서 actionView intent 리턴, null - no search file
+    fun openFileIntent(fileName: String, type: Type, id: Int? = null):Intent? {
+        val uri= pathToUri(fileName, type, id) ?: return null
 
         val intent = Intent(Intent.ACTION_VIEW)
         if (fileName.contains(".doc") || fileName.contains(".docx")) {
@@ -99,19 +139,9 @@ class FileUtil(private val BASE_PATH: String, private val context: Context) {
         return intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
 
-
-    // 유형에 따른 디렉토리 구분
-    // activityId - Activity 탭에 속할 ID or 이력서파일(null) => 디렉토리 구분해서 다른 활동안의 파일 이름과 중복 할수있게
-    private fun converterBaseUrl(activityId:Int?) =
-        if(activityId == null){
-            BASE_PATH + "Portfolios/"
-        }else{
-            BASE_PATH + "Activitys/$activityId/"
-        }
-
     //파일명 -> Uri
-    private fun pathToUri(fileName: String, activityId: Int?): Uri? {
-        val filePath = Environment.getExternalStoragePublicDirectory(converterBaseUrl(activityId) + fileName).path
+    private fun pathToUri(fileName: String, type: Type, id: Int? = null): Uri? {
+        val filePath = Environment.getExternalStoragePublicDirectory(converterBaseUrl(type,id) + fileName).toString()
         context.contentResolver.query(
             MediaStore.Files.getContentUri("external"), null,
             "_data = '$filePath'", null, null
@@ -121,17 +151,28 @@ class FileUtil(private val BASE_PATH: String, private val context: Context) {
             try{
                 return ContentUris.withAppendedId(MediaStore.Files.getContentUri("external"), it.getInt(idIndex).toLong())
             }catch (e: Exception){
+                e.printStackTrace()
                 return null
             }
         }
         return null
     }
 
+    // 유형에 따른 디렉토리 구분
+    // id - 해당 디렉토리에서 DB id 별로 구분 할 값
+    private fun converterBaseUrl(type: Type, id:Int? = null) =
+        BASE_PATH + type.name +
+                if(id==null){
+                    "/"
+                }else{
+                    "/$id/"
+                }
+
     // 해당 파일이 중복이더라도 뒤에 2, 3, 4.. 를 붙여 저장 가능한 Path 리턴
     private fun getFilePathNoOverride(base_path:String, fileName:String): Path {
         if(Files.exists(
                 Paths.get(
-                    Environment.getExternalStoragePublicDirectory(base_path).toString(),fileName
+                    Environment.getExternalStoragePublicDirectory(base_path).path,fileName
                 )
             )
         ){

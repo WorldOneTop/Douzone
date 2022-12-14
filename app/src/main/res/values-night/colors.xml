@@ -19,4 +19,18 @@
 
     <color name="white">#FFFFFF</color>
 
+    <color name="point1">#315430</color>
+    <color name="point2">#697245</color>
+    <color name="point3">#918D7F</color>
+    <color name="point4">#82381E</color>
+    <color name="point5">#82381E</color>
+    <color name="point6">#5B717C</color>
+    <array name="activityCategoryColor">
+        <item>@color/point1</item>
+        <item>@color/point2</item>
+        <item>@color/point3</item>
+        <item>@color/point4</item>
+        <item>@color/point5</item>
+        <item>@color/point6</item>
+    </array>
 </resources>

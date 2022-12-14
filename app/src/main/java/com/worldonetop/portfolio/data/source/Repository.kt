@@ -1,41 +1,46 @@
 package com.worldonetop.portfolio.data.source
 
+import androidx.lifecycle.LiveData
 import androidx.paging.PagingData
 import com.worldonetop.portfolio.data.model.Activitys
 import com.worldonetop.portfolio.data.model.Portfolio
-import com.worldonetop.portfolio.data.model.PortfolioDetail
 import com.worldonetop.portfolio.data.model.Question
-import kotlinx.coroutines.flow.Flow
 
 
 interface Repository{
 
-    suspend fun getPortfolio(): Flow<PagingData<Portfolio>> // 포트폴리오 탭 내용
 
-    suspend fun getActivitys():Flow<PagingData<Activitys>>  // 활동 탭 내용
 
-    suspend fun getQuestions():Flow<PagingData<Question>> // 문답 탭 내용
-
-    suspend fun getDetailPortfolio(id: Int):PortfolioDetail // 포트폴리오 자세한 내용
-
-    suspend fun getDetailActivity(id: Int):Activitys // 활동 자세한 내용
-
-    suspend fun addPortfolio(data: Portfolio)
-
-    suspend fun addActivity(data: Activitys)
-
+    // 문답 관련
+    fun getQuestionAll(): LiveData<PagingData<Question>> // 문답 리스트 전체 반환
+    fun getQuestionQuery(query: String): LiveData<PagingData<Question>> // 문답 검색에 따른 리스트 반환
+    fun getQuestionQuery(idList: List<Int>): LiveData<PagingData<Question>> // 아이디에 따른 리스트 반환
     suspend fun addQuestion(data: Question)
-
-    suspend fun updatePortfolio(data: Portfolio)
-
-    suspend fun updateActivity(data: Activitys)
-
     suspend fun updateQuestion(data: Question)
+    suspend fun removeQuestion(idList:List<Int>)
 
-    suspend fun removePortfolio(data: Portfolio)
+    // 이력서 관련
+    fun getPortfolioAll(): LiveData<PagingData<Portfolio>>
+    fun getPortfolioQuery(query: String): LiveData<PagingData<Portfolio>>
+    suspend fun getPortfolioSelected(idList: List<Int>): List<Portfolio>
+    suspend fun getLastPortfolioId():Int
+    suspend fun addPortfolio(data: Portfolio)
+    suspend fun updatePortfolio(data: Portfolio)
+    suspend fun removePortfolio(idList:List<Int>)
 
-    suspend fun removeActivity(data: Activitys)
 
-    suspend fun removeQuestion(data: Question)
+    fun getActivitysAll(): LiveData<PagingData<Activitys>>
+    fun getActivitysQuery(query: String): LiveData<PagingData<Activitys>>
+    fun getActivitysQuery(idList: List<Int>): LiveData<PagingData<Activitys>>
+    suspend fun getLastActivitysId():Int
+    suspend fun addActivitys(data: Activitys)
+    suspend fun updateActivitys(data: Activitys)
+    suspend fun removeActivitys(idList:List<Int>)
+    suspend fun getActivitysSelected(idList: List<Int>): List<Activitys>
+
+
+
+
+
 
 }

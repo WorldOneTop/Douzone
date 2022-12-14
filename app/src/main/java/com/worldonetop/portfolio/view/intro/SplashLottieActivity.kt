@@ -1,13 +1,11 @@
-package com.worldonetop.portfolio.view
+package com.worldonetop.portfolio.view.intro
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.worldonetop.portfolio.databinding.ActivitySplashLottieBinding
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.worldonetop.portfolio.view.main.MainActivity
+import kotlinx.coroutines.*
 import java.util.*
 
 class SplashLottieActivity : AppCompatActivity() {
@@ -17,7 +15,7 @@ class SplashLottieActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         CoroutineScope(Dispatchers.IO).launch {
-            Thread.sleep(1000L + Random().nextInt(2000))
+            delay(1000L + Random().nextInt(2000))
             withContext(Dispatchers.Main){
                 nextMainActivity()
             }
@@ -26,6 +24,5 @@ class SplashLottieActivity : AppCompatActivity() {
 
     private fun nextMainActivity(){
         startActivity(Intent(this@SplashLottieActivity, MainActivity::class.java))
-        this@SplashLottieActivity.finish()
     }
 }
