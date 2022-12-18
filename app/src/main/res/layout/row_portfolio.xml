@@ -47,7 +47,7 @@
 
                             <TextView
                                 android:id="@+id/fileName"
-                                android:transitionName="title"
+                                android:transitionName="fileName"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_columnWeight="1"
@@ -57,7 +57,7 @@
 
                             <TextView
                                 android:id="@+id/content"
-                                android:transitionName="content"
+                                android:transitionName="fileContent"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginHorizontal="8dp"

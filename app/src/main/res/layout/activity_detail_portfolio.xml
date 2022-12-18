@@ -65,7 +65,7 @@
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/title"
-                            android:transitionName="title"
+                            android:transitionName="fileName"
                             android:text="@={vm.portfolioData.title}"
                             android:hint="@string/add_file"
                             android:focusableInTouchMode="false"
@@ -85,7 +85,7 @@
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/content"
-                            android:transitionName="content"
+                            android:transitionName="fileContent"
                             android:text="@={vm.portfolioData.content}"
                             android:hint="@string/add_content"
                             android:enabled="@{vm.editMode}"
