@@ -14,10 +14,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <View
+            android:id="@+id/divider"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="98dp"
+            android:background="@color/secondaryTextColor"
+            android:layout_gravity="start"/>
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="18dp"
+            android:paddingVertical="18dp"
             android:paddingStart="8dp"
             android:paddingEnd="14dp">
 
@@ -68,11 +75,20 @@
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:layout_marginStart="82.5dp"
-                android:background="@drawable/background_circle"
+                android:background="@drawable/background_project_point"
                 app:layout_constraintBottom_toBottomOf="@id/startDate"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@id/startDate"
                 android:layout_marginBottom="5dp"/>
+            <View
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:background="@drawable/background_project_point"
+                android:backgroundTint="@color/primaryBackgroundColor"
+                app:layout_constraintTop_toTopOf="@id/point"
+                app:layout_constraintEnd_toEndOf="@id/point"
+                app:layout_constraintBottom_toBottomOf="@id/point"
+                app:layout_constraintStart_toStartOf="@id/point"/>
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardView"

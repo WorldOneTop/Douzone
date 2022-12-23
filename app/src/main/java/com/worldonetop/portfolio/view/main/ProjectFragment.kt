@@ -80,16 +80,11 @@ class ProjectFragment : BaseFragment<FragmentPagerBinding>(R.layout.fragment_pag
     }
 
     override fun initView() {
-        binding.divider.visibility = View.VISIBLE
         binding.root.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.secondaryBackgroundColor))
 
         viewModel.activitysData.observe(viewLifecycleOwner) {
             lifecycleScope.launch {
                 rvAdapter.submitData(it)
-                if(rvAdapter.itemCount == 0)
-                    binding.divider.visibility = View.GONE
-                else
-                    binding.divider.visibility = View.VISIBLE
             }
         }
 
@@ -261,10 +256,10 @@ class ProjectAdapter(private val clickListener:(data:Activitys, View:RowProjectB
         private fun setLikeLayout(isLike:Boolean){
             if(isLike){
                 binding.like.setImageResource(R.drawable.full_star)
-                binding.cardView.setCardBackgroundColor(binding.root.context.getColor(R.color.primaryLightColor))
+                binding.cardView.setCardBackgroundColor(ContextCompat.getColor(binding.root.context, R.color.primaryLightColor))
             }else{
                 binding.like.setImageResource(R.drawable.empty_star)
-                binding.cardView.setCardBackgroundColor(binding.root.context.getColor(R.color.primaryBackgroundColor))
+                binding.cardView.setCardBackgroundColor(ContextCompat.getColor(binding.root.context, R.color.primaryBackgroundColor))
             }
         }
         private fun setSelectedLayout(isSelected:Boolean){

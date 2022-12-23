@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.worldonetop.portfolio.R
 import com.worldonetop.portfolio.base.BaseFragment
 import com.worldonetop.portfolio.databinding.FragmentDetailBottomBinding
-import com.worldonetop.portfolio.databinding.RowLinksBinding
+import com.worldonetop.portfolio.databinding.RowBottomSheetBinding
 import com.worldonetop.portfolio.util.CustomDialog
 import com.worldonetop.portfolio.util.FileUtil
 import com.worldonetop.portfolio.view.main.ProjectAdapter
@@ -263,7 +263,7 @@ class AddActivityAdapter(
 
 
     inner class AddActionVH(
-        private val binding: RowLinksBinding,
+        private val binding: RowBottomSheetBinding,
         private val rootListener: (s:String) -> Unit,
         private val deleteListener: (s: String) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
@@ -289,7 +289,7 @@ class AddActivityAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AddActivityAdapter.AddActionVH {
         return AddActionVH(
-            RowLinksBinding.inflate(
+            RowBottomSheetBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent, false
             ),rootClickListener,deleteListener)

@@ -67,7 +67,6 @@ class QuestionFragment : BaseFragment<FragmentPagerBinding>(R.layout.fragment_pa
     }
 
     override fun initView() {
-        binding.divider.visibility = View.GONE
         binding.root.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.primaryBackgroundColor))
 
         viewModel.questionData.observe(viewLifecycleOwner) {

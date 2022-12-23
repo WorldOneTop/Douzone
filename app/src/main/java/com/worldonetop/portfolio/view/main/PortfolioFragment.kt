@@ -72,7 +72,6 @@ class PortfolioFragment : BaseFragment<FragmentPagerBinding>(R.layout.fragment_p
     }
 
     override fun initView() {
-        binding.divider.visibility = View.GONE
         binding.root.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.secondaryBackgroundColor))
 
         viewModel.portfolioData.observe(viewLifecycleOwner) {
@@ -241,10 +240,10 @@ class PortfolioAdapter(private val clickListener:(data:Portfolio, view:RowPortfo
         private fun setLikeLayout(isLike:Boolean){
             if(isLike){
                 binding.like.setImageResource(R.drawable.full_star)
-                binding.rootLayout.setCardBackgroundColor(binding.root.context.getColor(R.color.primaryLightColor))
+                binding.rootLayout.setCardBackgroundColor(ContextCompat.getColor(binding.root.context, R.color.primaryLightColor))
             }else{
                 binding.like.setImageResource(R.drawable.empty_star)
-                binding.rootLayout.setCardBackgroundColor(binding.root.context.getColor(R.color.primaryBackgroundColor))
+                binding.rootLayout.setCardBackgroundColor(ContextCompat.getColor(binding.root.context, R.color.primaryBackgroundColor))
             }
         }
         private fun setSelectedLayout(isSelected:Boolean){

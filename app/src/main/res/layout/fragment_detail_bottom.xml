@@ -7,6 +7,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:background="@drawable/background_round_top"
+    android:backgroundTint="@color/primaryLightBackgroundColor"
     android:paddingVertical="12dp"
     android:minHeight="200dp"
     android:layout_marginTop="200dp"

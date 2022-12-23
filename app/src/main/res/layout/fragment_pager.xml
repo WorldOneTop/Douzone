@@ -7,13 +7,6 @@
         android:layout_height="match_parent"
         android:background="@color/secondaryBackgroundColor">
 
-        <View
-            android:id="@+id/divider"
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:layout_marginStart="98dp"
-            android:background="@color/secondaryTextColor"
-            android:layout_gravity="start"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv"

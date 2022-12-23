@@ -12,7 +12,9 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
 import com.airbnb.lottie.LottieAnimationView
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.worldonetop.portfolio.R
+import com.worldonetop.portfolio.databinding.DialogWebSelectBinding
 import com.worldonetop.portfolio.view.main.WebViewActivity
 
 object CustomDialog {
@@ -46,12 +48,13 @@ object CustomDialog {
     }
 
     fun selectWebConnect(context: Context, url:String):Dialog{
-        return Dialog(context).apply {
-            setContentView(R.layout.dialog_web_select)
-            findViewById<LinearLayout>(R.id.webViewSelectedApp).setOnClickListener{
+        return BottomSheetDialog(context).apply {
+            val binding = DialogWebSelectBinding.inflate(layoutInflater)
+            setContentView(binding.root)
+            binding.webViewSelectedApp.setOnClickListener{
                 context.startActivity(Intent(context, WebViewActivity::class.java).putExtra("data",parsUrl(url)))
             }
-            findViewById<LinearLayout>(R.id.webViewSelectedBrowser).setOnClickListener{
+            binding.webViewSelectedBrowser.setOnClickListener{
                 try{
                     context.startActivity(Intent(Intent.ACTION_VIEW).setData(Uri.parse(parsUrl(url))))
                 }catch (e: Exception){

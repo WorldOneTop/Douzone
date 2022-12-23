@@ -12,6 +12,7 @@
     <color name="secondaryTextColor">#666666</color>
 
     <color name="primaryBackgroundColor">#FFFFFF</color>
+    <color name="primaryLightBackgroundColor">#F6F6F6</color>
     <color name="secondaryBackgroundColor">#EEEEEE</color>
 
     <color name="black">#000000</color>

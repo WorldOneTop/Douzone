@@ -13,9 +13,12 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
+import androidx.core.widget.doBeforeTextChanged
+import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
+import com.jakewharton.rxbinding4.widget.beforeTextChangeEvents
 import com.jakewharton.rxbinding4.widget.textChanges
 import com.worldonetop.portfolio.R
 import com.worldonetop.portfolio.base.BaseActivity
@@ -127,9 +130,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main){
             imm.hideSoftInputFromWindow(binding.searchView.windowToken,0)
         }
 
-        // 검색 시작과 끝 사이의 표시
-        binding.searchView.addTextChangedListener{
-            if(binding.viewPager.alpha != 0.5f)
+        // 검색 시작과 끝 사이의 UI 표시
+        binding.searchView.doOnTextChanged{ _, _, before, count ->
+            // 변화가 있을 때
+            if(binding.viewPager.alpha != 0.5f && (before != 0 || count != 0))
                 setViewPagerAlpha(0.5f)
         }
         // 검색 text rx binding
@@ -137,8 +141,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main){
             .debounce(700, TimeUnit.MILLISECONDS)// 마지막 글자 입력 0.7초 후에 onNext 이벤트로 데이터 스트리밍
             .subscribe{
                 CoroutineScope(Dispatchers.Main).launch {// view 의 값을 부르기에 main thread 로
-                    binding.viewPager.alpha = 1f
-                    viewModel.setQuery(it.toString())
+                    // 변화가 있을 때
+                    if(viewModel.query.value != it.toString())
+                        viewModel.setQuery(it.toString())
                 }
             }
 
