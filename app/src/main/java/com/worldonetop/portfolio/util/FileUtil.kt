@@ -6,10 +6,16 @@ import android.net.Uri
 import android.os.Environment
 import android.provider.OpenableColumns
 import androidx.core.content.FileProvider
+import com.bumptech.glide.Glide
+import com.google.gson.Gson
 import com.worldonetop.portfolio.BuildConfig
+import com.worldonetop.portfolio.data.model.LinkInfo
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import java.io.File
+import java.net.UnknownHostException
 import javax.inject.Inject
 
 
@@ -34,9 +40,9 @@ class FileUtil @Inject constructor(@ApplicationContext private val context: Cont
         // 복붙
         context.contentResolver.openInputStream(originUri)?.use { inputStream ->
             try {
-                CoroutineScope(Dispatchers.IO).launch {
+                withContext(Dispatchers.IO) {
                     inputStream.copyTo(newFile.outputStream())
-                }.join()
+                }
             } catch (e: Exception){
                 inputStream.close()
                 e.printStackTrace()
@@ -48,10 +54,12 @@ class FileUtil @Inject constructor(@ApplicationContext private val context: Cont
     // 해당 파일 부분 삭제
     suspend fun removeFile(fileName: List<String>, type: Type, id: Int?=null){
         val baseFile = getBaseFile(type, id)
-        for(name in fileName){
-            File(baseFile, name).apply {
-                if(exists())
-                    delete()
+        withContext(Dispatchers.IO) {
+            for(name in fileName){
+                File(baseFile, name).apply {
+                    if(exists())
+                        delete()
+                }
             }
         }
     }
@@ -93,7 +101,7 @@ class FileUtil @Inject constructor(@ApplicationContext private val context: Cont
 
         if(newFile.exists()){
             var count = 1
-            var fileNameOnly=""
+            var fileNameOnly: String
             var fileType=""
             fileName.lastIndexOf(".").let {
                 if(it==-1)
@@ -157,5 +165,70 @@ class FileUtil @Inject constructor(@ApplicationContext private val context: Cont
             intent.setDataAndType(uri, "*/*")
         }
         return intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+
+    suspend fun getLinkInfo(url:String):LinkInfo? = coroutineScope {
+        val fileName = url.replace(".","").replace("/","")
+        val file = File(context.cacheDir,fileName)
+        var result: LinkInfo? = null
+
+        if(!file.exists()){
+            withContext(Dispatchers.IO) {
+                val urlParse = if (!url.startsWith("http://") && !url.startsWith("https://"))
+                    "http://$url"
+                else url
+
+                val document: Document?
+                try {
+                    document = Jsoup.connect(urlParse).get()
+                }catch (e:UnknownHostException){
+                    return@withContext
+                }
+
+                result = LinkInfo(file.path)
+                document?.select("meta[property^=og:]")?.let {
+                    try{
+                        it.forEach { el ->
+                            when(el.attr("property")) {
+                                "og:title" -> {
+                                    result!!.title = el.attr("content")
+                                }
+                                "og:description" -> {
+                                    result!!.description = el.attr("content")
+                                }
+                                "og:image" -> {
+                                    result!!.image = el.attr("content")
+                                }
+                            }
+                        }
+
+                        file.writeText(Gson().toJson(result))
+                    }catch (e:Exception){
+                        result = null
+                        e.printStackTrace()
+                    }
+                }
+            }
+        }else{
+            try {
+                result = Gson().fromJson(file.readText(), LinkInfo::class.java)
+            }catch (e:Exception){
+                e.printStackTrace()
+            }
+        }
+        result
+    }
+    suspend fun removeLinkInfo(linkInfo: LinkInfo?){
+        linkInfo?.let {
+            withContext(Dispatchers.IO){
+                File(it.filePath).apply {
+                    if(exists()){
+                        launch { Glide.with(context).asFile().load(it.image).submit().get().delete() }
+                        launch { delete() }
+                    }
+
+                }
+            }
+        }
     }
 }

@@ -12,8 +12,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.worldonetop.portfolio.R
 import com.worldonetop.portfolio.base.BaseFragment
+import com.worldonetop.portfolio.data.model.LinkInfo
 import com.worldonetop.portfolio.databinding.FragmentDetailBottomBinding
 import com.worldonetop.portfolio.databinding.RowBottomSheetBinding
 import com.worldonetop.portfolio.util.CustomDialog
@@ -66,39 +68,37 @@ class DetailBottomFragment: BaseFragment<FragmentDetailBottomBinding>(R.layout.f
         // bottom sheet adapter setting
         when(type){
             Type.LINKS.ordinal ->{ // Start - bottom adapter setting (Link)
-                addActivityAdapter = AddActivityAdapter(viewModel.activityData.links,
+                addActivityAdapter = AddActivityAdapter(fileUtil, viewModel.activityData.links,
                     { // 상세보기 리스너
                         CustomDialog.selectWebConnect(requireContext(), it).show()
                     }, { // 삭제 리스너
-                        val removeIndex = viewModel.activityData.links.indexOf(it)
-                        if(removeIndex != -1) {
-                            viewModel.activityData.links.removeAt(removeIndex)
-                            addActivityAdapter.notifyItemRemoved(removeIndex)
-                        }
                     }
                 )
                 binding.rvBtm.adapter = addActivityAdapter
+                try {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        addActivityAdapter.setLinkInfo()
+                    }
+                }catch (e:Exception){
+                    e.printStackTrace()
+                }
             } // End - bottom adapter setting (Link)
             Type.FILES.ordinal ->{ // Start - bottom adapter setting (File)
-                addActivityAdapter = AddActivityAdapter(viewModel.activityData.files,
+                addActivityAdapter = AddActivityAdapter(fileUtil, viewModel.activityData.files,
                     {// 상세보기 리스너
-                        val fileIntent = if(viewModel.activityData.activityId==0){
-                            fileUtil.openFileIntent(it, FileUtil.Companion.Type.Cache, null)
-                        }else{
-                            fileUtil.openFileIntent(it, FileUtil.Companion.Type.Activity, viewModel.activityData.activityId)
-                        }
+                        try{
+                            val fileIntent = if(viewModel.activityData.activityId==0){
+                                fileUtil.openFileIntent(it, FileUtil.Companion.Type.Cache, null)
+                            }else{
+                                fileUtil.openFileIntent(it, FileUtil.Companion.Type.Activity, viewModel.activityData.activityId)
+                            }
 
-                        if(fileIntent == null)
-                            Toast.makeText(requireContext(), getString(R.string.error_connect_unknown), Toast.LENGTH_LONG).show()
-                        else
                             activity?.startActivity(fileIntent)
+                        }catch (e:Exception){
+                            Toast.makeText(requireContext(), getString(R.string.error_connect_unknown), Toast.LENGTH_LONG).show()
+                        }
                     }, { // 삭제 리스너
                         viewModel.removeFiles.add(it)
-                        val removeIndex = viewModel.activityData.files.indexOf(it)
-                        if(removeIndex != -1){
-                            viewModel.activityData.files.removeAt(removeIndex)
-                            addActivityAdapter.notifyItemRemoved(removeIndex)
-                        }
                     }
                 )
                 binding.rvBtm.adapter = addActivityAdapter
@@ -220,8 +220,7 @@ class DetailBottomFragment: BaseFragment<FragmentDetailBottomBinding>(R.layout.f
 
                             withContext(Dispatchers.Main){ // 저장한 파일 이름 표시 및 데이터로 저장
                                 loadingDialog.dismiss()
-                                viewModel.activityData.files.add(fileName)
-                                addActivityAdapter.notifyItemInserted(viewModel.activityData.files.size -1)
+                                addActivityAdapter.addItem(fileName,false)
                             }
                         }catch (e: Exception){
                             e.printStackTrace()
@@ -240,8 +239,7 @@ class DetailBottomFragment: BaseFragment<FragmentDetailBottomBinding>(R.layout.f
             if(type == Type.LINKS.ordinal) {
                 CustomDialog.addLink(requireContext()) {
                     if (it.isNotBlank()) {
-                        viewModel.activityData.links.add(it)
-                        addActivityAdapter.notifyItemInserted(viewModel.activityData.links.size -1)
+                        addActivityAdapter.addItem(it, true)
                     }
                 }.show()
             }
@@ -254,21 +252,34 @@ class DetailBottomFragment: BaseFragment<FragmentDetailBottomBinding>(R.layout.f
 }
 
 class AddActivityAdapter(
+    private val fileUtil: FileUtil,
     private val data: ArrayList<String>, // view model 의 데이터와 같음
     private val rootClickListener: (String)->Unit, // 해당 아이템 클릭, 해당 데이터 전달
     private val deleteListener: (String)->Unit, // 해당 아이템 제거, 해당 데이터 전달
 ): RecyclerView.Adapter<AddActivityAdapter.AddActionVH>() {
 
     private var viewMode = false
-
+    private var linkInfo = mutableMapOf<String,LinkInfo>()
 
     inner class AddActionVH(
         private val binding: RowBottomSheetBinding,
         private val rootListener: (s:String) -> Unit,
         private val deleteListener: (s: String) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(str: String, viewMode: Boolean) {
-            binding.linkText.text = str
+        fun bind(str: String, viewMode: Boolean, linkInfo: LinkInfo?=null) {
+            binding.title.text = str
+
+            if(linkInfo == null){
+                binding.linkTitle.visibility = View.GONE
+                binding.linkImage.visibility = View.GONE
+            }else{
+                binding.linkTitle.visibility = View.VISIBLE
+                binding.linkImage.visibility = View.VISIBLE
+                binding.linkTitle.text = linkInfo.title
+                Glide.with(binding.root.context)
+                    .load(linkInfo.image)
+                    .into(binding.linkImage)
+            }
             if(viewMode)
                 binding.delete.visibility = View.GONE
             else
@@ -281,10 +292,46 @@ class AddActivityAdapter(
             }
         }
     }
+    fun addItem(item: String, isLink:Boolean){
+        data.add(item)
+        notifyItemInserted(data.size -1)
+        if(isLink){
+            CoroutineScope(Dispatchers.IO).launch {
+                fileUtil.getLinkInfo(item)?.let {
+                    linkInfo[item] = it
+                }
+            }
+        }
+    }
+    private fun removeItem(item: String){
+        val removeIndex = data.indexOf(item)
+        if(removeIndex != -1) {
+            CoroutineScope(Dispatchers.IO).launch {
+                fileUtil.removeLinkInfo(linkInfo.getOrDefault(data[removeIndex], null))
+
+                withContext(Dispatchers.Main){
+                    data.removeAt(removeIndex)
+                    notifyItemRemoved(removeIndex)
+                }
+            }
+        }
+    }
 
     fun setViewMode(viewMode: Boolean){
         this.viewMode =viewMode
         notifyDataSetChanged()
+    }
+    fun setLinkInfo(){
+        CoroutineScope(Dispatchers.IO).launch {
+            for(i in 0 until data.size){
+                fileUtil.getLinkInfo(data[i])?.let {
+                    linkInfo[data[i]] = it
+                }
+                withContext(Dispatchers.Main){
+                    notifyItemChanged(i)
+                }
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AddActivityAdapter.AddActionVH {
@@ -292,11 +339,14 @@ class AddActivityAdapter(
             RowBottomSheetBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent, false
-            ),rootClickListener,deleteListener)
+            ),rootClickListener) {
+            removeItem(it)
+            deleteListener(it)
+        }
     }
 
     override fun onBindViewHolder(holder: AddActionVH, position: Int) {
-        holder.bind(data[position], viewMode)
+        holder.bind(data[position], viewMode, linkInfo.getOrDefault(data[position], null))
     }
 
     override fun getItemCount(): Int {
