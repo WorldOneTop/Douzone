@@ -5,17 +5,25 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Environment
 import android.provider.OpenableColumns
+import android.util.Log
 import androidx.core.content.FileProvider
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.worldonetop.portfolio.BuildConfig
+import com.worldonetop.portfolio.R
+import com.worldonetop.portfolio.data.model.Activitys
 import com.worldonetop.portfolio.data.model.LinkInfo
+import com.worldonetop.portfolio.data.model.Portfolio
+import com.worldonetop.portfolio.data.model.Question
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.io.File
 import java.net.UnknownHostException
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
 import javax.inject.Inject
 
 
@@ -27,6 +35,9 @@ class FileUtil @Inject constructor(@ApplicationContext private val context: Cont
             // 임시, 이력서, 활동들
         }
     }
+
+    /** normal file util */
+
     // 공용 저장소에서 가져온 파일을 따로 저장하기 위해서(viewer 때문에 공용 저장소에 보관)
     // originUri - getContent intent 로 가져온 uri
     // type - 상위 디렉토리 구분
@@ -75,101 +86,11 @@ class FileUtil @Inject constructor(@ApplicationContext private val context: Cont
         }
     }
 
-    private fun uriToFileName(uri:Uri):String?{
-        context.contentResolver.query(uri, null, null, null, null)?.use {
-            val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-            it.moveToFirst()
-            if(nameIndex != -1)
-                return it.getString(nameIndex)
-        }
-        return null
-    }
 
-    // type과 id에 따라 저장될 기본 디렉토리
-    private fun getBaseFile(type: Type, id: Int? = null):File?{
-        return if(type == Type.Cache){
-            context.externalCacheDir
-        }else{
-            val directory = type.name + if(id != null) "/$id/" else "/"
-            File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), directory)
-        }
-    }
-    // 새로운 파일이 저장될 파일, 중복 이름의 경우 이름뒤에 숫자를 붙임
-    private fun getNewFile(fileName: String, type: Type, id: Int? = null):File{
-        val baseFile = getBaseFile(type,id)
-        var newFile = File(baseFile, fileName)
-
-        if(newFile.exists()){
-            var count = 1
-            var fileNameOnly: String
-            var fileType=""
-            fileName.lastIndexOf(".").let {
-                if(it==-1)
-                    fileNameOnly= fileName
-                else {
-                    fileNameOnly = fileName.substring(0,it)
-                    fileType = fileName.substring(it)
-                }
-            }
-
-            while(newFile.exists()){
-                newFile = File(baseFile, fileNameOnly+count+fileType)
-                count += 1
-            }
-        }
-        newFile.parentFile?.mkdirs()
-        return newFile
-    }
-
-    // 해당 파일 명과 구분값을 받아서 actionView intent 리턴, null - no search file
-    fun openFileIntent(fileName: String, type: Type, id: Int? = null):Intent {
-        val uri= FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".fileprovider", File(getBaseFile(type,id), fileName))
-
-        val intent = Intent(Intent.ACTION_VIEW)
-        if (fileName.endsWith(".doc") || fileName.endsWith(".docx")) {
-            // Word document
-            intent.setDataAndType(uri, "application/msword")
-        } else if (fileName.endsWith(".pdf")) {
-            // PDF file
-            intent.setDataAndType(uri, "application/pdf")
-        } else if (fileName.endsWith(".ppt") || fileName.endsWith(".pptx")) {
-            // Powerpoint file
-            intent.setDataAndType(uri, "application/vnd.ms-powerpoint")
-        } else if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx")) {
-            // Excel file
-            intent.setDataAndType(uri, "application/vnd.ms-excel")
-        }
-        else if (fileName.endsWith(".rtf")) {
-            // RTF file
-            intent.setDataAndType(uri, "application/rtf")
-        } else if (fileName.endsWith(".wav") || fileName.endsWith(".mp3")) {
-            // WAV audio file
-            intent.setDataAndType(uri, "audio/x-wav")
-        } else if (fileName.endsWith(".gif")) {
-            // GIF file
-            intent.setDataAndType(uri, "image/gif")
-        } else if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".png")) {
-            // JPG file
-            intent.setDataAndType(uri, "image/jpeg")
-        } else if (fileName.endsWith(".txt")) {
-            // Text file
-            intent.setDataAndType(uri, "text/plain")
-        } else if (fileName.endsWith(".3gp") || fileName
-                .endsWith(".mpg") || fileName.endsWith(".mpeg") || fileName
-                .endsWith(".mpe") || fileName.endsWith(".mp4") || fileName
-                .endsWith(".avi")
-        ) {
-            // Video files
-            intent.setDataAndType(uri, "video/*")
-        } else {
-            intent.setDataAndType(uri, "*/*")
-        }
-        return intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-    }
-
+    /** og tag */
     suspend fun getLinkInfo(url:String):LinkInfo? = coroutineScope {
         val fileName = url.replace(".","").replace("/","")
-        val file = File(context.cacheDir,fileName)
+        val file = File(context.externalCacheDir,fileName)
         var result: LinkInfo? = null
 
         if(!file.exists()){
@@ -230,5 +151,159 @@ class FileUtil @Inject constructor(@ApplicationContext private val context: Cont
                 }
             }
         }
+    }
+
+    /** shared data */
+    suspend fun sharedActivitys(data: List<Activitys>){
+
+    }
+    suspend fun sharedPortfolio(data: List<Portfolio>){
+
+    }
+    // TODO("캐시파일 지우기, 다른거도 하기")
+    suspend fun sharedQuestion(data: List<Question>):File = withContext(Dispatchers.IO){
+        val file = File(context.externalCacheDir,"test.zip")
+        val zipOutputStream = ZipOutputStream(file.outputStream())
+        val files = arrayListOf<File>()
+        for(i in data.indices){
+            val addFile = File(context.externalCacheDir,"${context.getString(R.string.tab_qna)}$i.txt")
+            addFile.writeText(createSharedTextData(data[i]))
+            files.add(addFile)
+            val zipEntry = ZipEntry("${context.getString(R.string.tab_qna)}$i.txt")
+            zipOutputStream.putNextEntry(zipEntry)
+            zipOutputStream.write(addFile.readBytes())
+        }
+        zipOutputStream.closeEntry()
+        zipOutputStream.close()
+        Log.d("asdasd","${file.toString()}   ${file.exists()}")
+        file
+    }
+    suspend fun makeZipFolder(){
+
+    }
+
+    /** view intent */
+    // 해당 파일 명과 구분값을 받아서 actionView intent 리턴, null - no search file
+    fun openFileIntent(fileName: String, type: Type, id: Int? = null):Intent {
+        val uri= FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".fileprovider", File(getBaseFile(type,id), fileName))
+
+        val intent = Intent(Intent.ACTION_VIEW)
+        if (fileName.endsWith(".doc") || fileName.endsWith(".docx")) {
+            // Word document
+            intent.setDataAndType(uri, "application/msword")
+        } else if (fileName.endsWith(".pdf")) {
+            // PDF file
+            intent.setDataAndType(uri, "application/pdf")
+        } else if (fileName.endsWith(".ppt") || fileName.endsWith(".pptx")) {
+            // Powerpoint file
+            intent.setDataAndType(uri, "application/vnd.ms-powerpoint")
+        } else if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx")) {
+            // Excel file
+            intent.setDataAndType(uri, "application/vnd.ms-excel")
+        } else if (fileName.endsWith(".rtf")) {
+            // RTF file
+            intent.setDataAndType(uri, "application/rtf")
+        } else if (fileName.endsWith(".wav") || fileName.endsWith(".mp3")) {
+            // WAV audio file
+            intent.setDataAndType(uri, "audio/x-wav")
+        } else if (fileName.endsWith(".gif")) {
+            // GIF file
+            intent.setDataAndType(uri, "image/gif")
+        } else if (fileName.endsWith(".zip")) {
+            // ZIP file
+            intent.setDataAndType(uri, "application/zip")
+        } else if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".png")) {
+            // JPG file
+            intent.setDataAndType(uri, "image/jpeg")
+        } else if (fileName.endsWith(".txt")) {
+            // Text file
+            intent.setDataAndType(uri, "text/plain")
+        } else if (fileName.endsWith(".3gp") || fileName
+                .endsWith(".mpg") || fileName.endsWith(".mpeg") || fileName
+                .endsWith(".mpe") || fileName.endsWith(".mp4") || fileName
+                .endsWith(".avi")
+        ) {
+            // Video files
+            intent.setDataAndType(uri, "video/*")
+        } else {
+            intent.setDataAndType(uri, "*/*")
+        }
+        return intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+
+    /** private function */
+    /** file util */
+    private fun uriToFileName(uri:Uri):String?{
+        context.contentResolver.query(uri, null, null, null, null)?.use {
+            val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            it.moveToFirst()
+            if(nameIndex != -1)
+                return it.getString(nameIndex)
+        }
+        return null
+    }
+
+    // type과 id에 따라 저장될 기본 디렉토리
+    private fun getBaseFile(type: Type, id: Int? = null):File?{
+        return if(type == Type.Cache){
+            context.externalCacheDir
+        }else{
+            val directory = type.name + if(id != null) "/$id/" else "/"
+            File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), directory)
+        }
+    }
+    // 새로운 파일이 저장될 파일, 중복 이름의 경우 이름뒤에 숫자를 붙임
+    private fun getNewFile(fileName: String, type: Type, id: Int? = null):File{
+        val baseFile = getBaseFile(type,id)
+        var newFile = File(baseFile, fileName)
+
+        if(newFile.exists()){
+            var count = 1
+            var fileNameOnly: String
+            var fileType=""
+            fileName.lastIndexOf(".").let {
+                if(it==-1)
+                    fileNameOnly= fileName
+                else {
+                    fileNameOnly = fileName.substring(0,it)
+                    fileType = fileName.substring(it)
+                }
+            }
+
+            while(newFile.exists()){
+                newFile = File(baseFile, fileNameOnly+count+fileType)
+                count += 1
+            }
+        }
+        newFile.parentFile?.mkdirs()
+        return newFile
+    }
+    /** shared data */
+    private fun createSharedTextData(data:Any):String{
+        var text = when(data){
+            is Activitys ->{
+                "${context.getString(R.string.add_activity_title_short)} : ${data.title}\n" +
+                        "${context.getString(R.string.category)} : ${context.resources.getStringArray(R.array.activityCategoryString)[data.type]}\n" +
+                        "${context.getString(R.string.date_short)} : ${data.title} ~ " +
+                        if(data.endDate != null) "${data.endDate}\n" else "\n" +
+                        if(data.content != null) "${context.getString(R.string.add_content_short)} : ${data.content}" else ""
+            }
+            is Portfolio ->{
+                if(data.content != null) "${context.getString(R.string.add_content_short)} : ${data.content}" else ""
+            }
+            is Question ->{
+                "Q. ${data.question}\n\nA. ${data.answer}"
+            }
+            else -> return ""
+        }
+
+        (data as? Activitys)?.let {
+            if(it.links.isNotEmpty())
+                text += context.getString(R.string.add_links)
+            for(link in it.links)
+                text += "\n${link}"
+        }
+
+        return text
     }
 }

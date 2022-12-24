@@ -2,6 +2,7 @@ package com.worldonetop.portfolio.data.source.local
 
 import androidx.paging.PagingSource
 import androidx.room.*
+import com.worldonetop.portfolio.data.model.Activitys
 import com.worldonetop.portfolio.data.model.Question
 
 @Dao
@@ -14,8 +15,10 @@ interface QuestionDao {
     fun getQuestionQuery(query: String): PagingSource<Int, Question>
 
     @Query("SELECT * FROM Question WHERE questionId IN (:idList)  ORDER BY questionId DESC")
-    fun getQuestionSelected(idList: List<Int>): PagingSource<Int, Question>
+    fun getQuestionQuery(idList: List<Int>): PagingSource<Int, Question>
 
+    @Query("SELECT * FROM Question WHERE questionId IN (:idList)")
+    suspend fun getQuestionSelected(idList: List<Int>): List<Question>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addQuestion(data: Question)

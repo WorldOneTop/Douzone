@@ -33,8 +33,11 @@ class RepositoryImpl(private val db:AppDatabase):Repository  {
     }
     override fun getQuestionQuery(idList: List<Int>): LiveData<PagingData<Question>> {
         return Pager(config) {
-            db.questionDao().getQuestionSelected(idList)
+            db.questionDao().getQuestionQuery(idList)
         }.liveData
+    }
+    override suspend fun getQuestionSelected(idList: List<Int>): List<Question> {
+        return db.questionDao().getQuestionSelected(idList)
     }
 
 

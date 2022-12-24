@@ -1,29 +1,37 @@
 package com.worldonetop.portfolio.view.main
 
+import android.app.Dialog
 import android.content.Intent
 import android.graphics.Color
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.worldonetop.portfolio.BuildConfig
 import com.worldonetop.portfolio.R
 import com.worldonetop.portfolio.base.BaseFragment
 import com.worldonetop.portfolio.data.model.Question
 import com.worldonetop.portfolio.data.source.Repository
 import com.worldonetop.portfolio.databinding.FragmentPagerBinding
 import com.worldonetop.portfolio.databinding.RowQuestionBinding
+import com.worldonetop.portfolio.util.CustomDialog
+import com.worldonetop.portfolio.util.FileUtil
 import com.worldonetop.portfolio.view.detail.DetailQuestionActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 import javax.inject.Inject
 import androidx.core.util.Pair as UtilPair
 
@@ -36,6 +44,8 @@ class QuestionFragment : BaseFragment<FragmentPagerBinding>(R.layout.fragment_pa
 
     private val viewModel: MainViewModel by activityViewModels()
     @Inject lateinit var repository: Repository
+    @Inject lateinit var fileUtil: FileUtil
+    private lateinit var loadingDialog: Dialog
 
     private lateinit var rvAdapter: QuestionAdapter
 
@@ -64,6 +74,8 @@ class QuestionFragment : BaseFragment<FragmentPagerBinding>(R.layout.fragment_pa
         )
 
         binding.rv.adapter = rvAdapter
+        loadingDialog = CustomDialog.loading(requireContext())
+
     }
 
     override fun initView() {
@@ -94,16 +106,36 @@ class QuestionFragment : BaseFragment<FragmentPagerBinding>(R.layout.fragment_pa
 
         // delete, share 이벤트 처리
         viewModel.eventFloatingBtn.observe(viewLifecycleOwner){
+            if(!rvAdapter.isSelectedMode())
+                return@observe
             when(it){
                 MainViewModel.Companion.Type.DELETE ->{
                     CoroutineScope(Dispatchers.IO).launch {
                         repository.removeQuestion(rvAdapter.getSelectedIds())
+                        withContext(Dispatchers.Main){
+                            viewModel.eventFloatingBtn.value = MainViewModel.Companion.Type.NONE
+                            viewModel.selectMode.value = false
+                        }
                     }
-                    viewModel.eventFloatingBtn.value = MainViewModel.Companion.Type.NONE
-                    viewModel.selectMode.value = false
                 }
                 MainViewModel.Companion.Type.SHARE ->{
-                    viewModel.eventFloatingBtn.value = MainViewModel.Companion.Type.NONE
+                    loadingDialog.show()
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val shareData = repository.getQuestionSelected(rvAdapter.getSelectedIds())
+                        val file = fileUtil.sharedQuestion(shareData)
+                        val uriToFile = FileProvider.getUriForFile(requireContext(), BuildConfig.APPLICATION_ID + ".fileprovider", file)
+                        withContext(Dispatchers.Main){
+                            loadingDialog.dismiss()
+                            viewModel.eventFloatingBtn.value = MainViewModel.Companion.Type.NONE
+                            val shareIntent: Intent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_STREAM, uriToFile)
+                                type = "application/zip"
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            }
+                            startActivity(Intent.createChooser(shareIntent, "share"))
+                        }
+                    }
                 }
                 else ->{}
             }

@@ -11,10 +11,12 @@
 
 
     <string name="add_activity_title">활동 명을 입력하세요.</string>
+    <string name="add_activity_title_short">활동 명</string>
     <string name="add_question">질문을 입력하세요.</string>
     <string name="add_answer">답변을 입력하세요.</string>
     <string name="add_file">파일을 추가하세요.</string>
     <string name="add_content">상세 내용을 입력하세요.</string>
+    <string name="add_content_short">상세 내용</string>
 
     <string name="add_files">관련 파일</string>
     <string name="add_links">관련 링크</string>
@@ -32,6 +34,7 @@
 
 
     <string name="category">카테고리</string>
+    <string name="date_short">기간</string>
     <string name="start_date">시작 날짜</string>
     <string name="end_date">종료 날짜</string>
     <string name="submit">제출</string>

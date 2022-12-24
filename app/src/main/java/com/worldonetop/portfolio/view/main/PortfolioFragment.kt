@@ -98,9 +98,10 @@ class PortfolioFragment : BaseFragment<FragmentPagerBinding>(R.layout.fragment_p
         }
         // delete, share 이벤트 처리
         viewModel.eventFloatingBtn.observe(viewLifecycleOwner){
+            if(!rvAdapter.isSelectedMode())
+                return@observe
             when(it){
                 MainViewModel.Companion.Type.DELETE ->{
-                    if(rvAdapter.isSelectedMode()){
                         loadingDialog.show()
                         CoroutineScope(Dispatchers.IO).launch {
                             val removeData = repository.getPortfolioSelected(rvAdapter.getSelectedIds())
@@ -114,7 +115,6 @@ class PortfolioFragment : BaseFragment<FragmentPagerBinding>(R.layout.fragment_p
                                 loadingDialog.dismiss()
                             }
                         }
-                    }
                 }
                 MainViewModel.Companion.Type.SHARE ->{
                     viewModel.eventFloatingBtn.value = MainViewModel.Companion.Type.NONE

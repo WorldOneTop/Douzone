@@ -15,6 +15,7 @@ interface Repository{
     fun getQuestionAll(): LiveData<PagingData<Question>> // 문답 리스트 전체 반환
     fun getQuestionQuery(query: String): LiveData<PagingData<Question>> // 문답 검색에 따른 리스트 반환
     fun getQuestionQuery(idList: List<Int>): LiveData<PagingData<Question>> // 아이디에 따른 리스트 반환
+    suspend fun getQuestionSelected(idList: List<Int>): List<Question>
     suspend fun addQuestion(data: Question)
     suspend fun updateQuestion(data: Question)
     suspend fun removeQuestion(idList:List<Int>)
