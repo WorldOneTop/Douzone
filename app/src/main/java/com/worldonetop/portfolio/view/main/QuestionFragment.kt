@@ -3,10 +3,11 @@ package com.worldonetop.portfolio.view.main
 import android.app.Dialog
 import android.content.Intent
 import android.graphics.Color
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -31,9 +32,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
 import javax.inject.Inject
 import androidx.core.util.Pair as UtilPair
+
 
 @AndroidEntryPoint
 class QuestionFragment : BaseFragment<FragmentPagerBinding>(R.layout.fragment_pager) {
@@ -48,6 +49,7 @@ class QuestionFragment : BaseFragment<FragmentPagerBinding>(R.layout.fragment_pa
     private lateinit var loadingDialog: Dialog
 
     private lateinit var rvAdapter: QuestionAdapter
+    private lateinit var sharedFileLauncher: ActivityResultLauncher<Intent>
 
     override fun initData() {
         // paging adapter
@@ -109,36 +111,40 @@ class QuestionFragment : BaseFragment<FragmentPagerBinding>(R.layout.fragment_pa
             if(!rvAdapter.isSelectedMode())
                 return@observe
             when(it){
-                MainViewModel.Companion.Type.DELETE ->{
+                MainViewModel.Companion.EventType.DELETE ->{
                     CoroutineScope(Dispatchers.IO).launch {
                         repository.removeQuestion(rvAdapter.getSelectedIds())
                         withContext(Dispatchers.Main){
-                            viewModel.eventFloatingBtn.value = MainViewModel.Companion.Type.NONE
+                            viewModel.eventFloatingBtn.value = MainViewModel.Companion.EventType.NONE
                             viewModel.selectMode.value = false
                         }
                     }
                 }
-                MainViewModel.Companion.Type.SHARE ->{
+                MainViewModel.Companion.EventType.SHARE ->{
                     loadingDialog.show()
                     CoroutineScope(Dispatchers.IO).launch {
                         val shareData = repository.getQuestionSelected(rvAdapter.getSelectedIds())
-                        val file = fileUtil.sharedQuestion(shareData)
+                        val file = fileUtil.makeZipFolder(fileUtil.createSharedQuestion(shareData, getString(R.string.tab_qna) + ".txt"))
                         val uriToFile = FileProvider.getUriForFile(requireContext(), BuildConfig.APPLICATION_ID + ".fileprovider", file)
                         withContext(Dispatchers.Main){
                             loadingDialog.dismiss()
-                            viewModel.eventFloatingBtn.value = MainViewModel.Companion.Type.NONE
+                            viewModel.eventFloatingBtn.value = MainViewModel.Companion.EventType.NONE
                             val shareIntent: Intent = Intent().apply {
                                 action = Intent.ACTION_SEND
                                 putExtra(Intent.EXTRA_STREAM, uriToFile)
-                                type = "application/zip"
+                                type = "application/txt"
                                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                             }
-                            startActivity(Intent.createChooser(shareIntent, "share"))
+                            sharedFileLauncher.launch(Intent.createChooser(shareIntent, "share"))
                         }
                     }
                 }
                 else ->{}
             }
+        }
+
+        sharedFileLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
+            CoroutineScope(Dispatchers.IO).launch{ fileUtil.removeShasredData(getString(R.string.tab_qna)) }
         }
     }
 }

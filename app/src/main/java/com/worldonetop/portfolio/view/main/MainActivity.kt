@@ -12,13 +12,10 @@ import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.core.view.isVisible
-import androidx.core.widget.addTextChangedListener
-import androidx.core.widget.doBeforeTextChanged
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
-import com.jakewharton.rxbinding4.widget.beforeTextChangeEvents
 import com.jakewharton.rxbinding4.widget.textChanges
 import com.worldonetop.portfolio.R
 import com.worldonetop.portfolio.base.BaseActivity
@@ -149,10 +146,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main){
 
         // floating button
         binding.fabShare.setOnClickListener{
-            viewModel.eventFloatingBtn.value = MainViewModel.Companion.Type.SHARE
+            viewModel.eventFloatingBtn.value = MainViewModel.Companion.EventType.SHARE
         }
         binding.fabDelete.setOnClickListener{
-            viewModel.eventFloatingBtn.value = MainViewModel.Companion.Type.DELETE
+            viewModel.eventFloatingBtn.value = MainViewModel.Companion.EventType.DELETE
         }
         viewModel.selectMode.observe(this){
             if(it)

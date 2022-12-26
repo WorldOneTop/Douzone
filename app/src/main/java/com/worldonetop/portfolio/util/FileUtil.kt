@@ -5,7 +5,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Environment
 import android.provider.OpenableColumns
-import android.util.Log
 import androidx.core.content.FileProvider
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
@@ -22,7 +21,6 @@ import org.jsoup.nodes.Document
 import java.io.File
 import java.net.UnknownHostException
 import java.util.zip.ZipEntry
-import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 import javax.inject.Inject
 
@@ -154,32 +152,104 @@ class FileUtil @Inject constructor(@ApplicationContext private val context: Cont
     }
 
     /** shared data */
-    suspend fun sharedActivitys(data: List<Activitys>){
-
+    suspend fun removeShasredData(fileName: String) = withContext(Dispatchers.IO){
+        launch { File(context.externalCacheDir, fileName).delete() }
+        launch { File(context.externalCacheDir, "$fileName.zip").delete() }
     }
-    suspend fun sharedPortfolio(data: List<Portfolio>){
-
-    }
-    // TODO("캐시파일 지우기, 다른거도 하기")
-    suspend fun sharedQuestion(data: List<Question>):File = withContext(Dispatchers.IO){
-        val file = File(context.externalCacheDir,"test.zip")
-        val zipOutputStream = ZipOutputStream(file.outputStream())
-        val files = arrayListOf<File>()
+    suspend fun createSharedActivitys(data: List<Activitys>, fileName: String):File = withContext(Dispatchers.IO){
+        val rootFile = File(context.externalCacheDir, fileName)
+        rootFile.deleteOnExit()
+        rootFile.mkdir()
         for(i in data.indices){
-            val addFile = File(context.externalCacheDir,"${context.getString(R.string.tab_qna)}$i.txt")
-            addFile.writeText(createSharedTextData(data[i]))
-            files.add(addFile)
-            val zipEntry = ZipEntry("${context.getString(R.string.tab_qna)}$i.txt")
-            zipOutputStream.putNextEntry(zipEntry)
-            zipOutputStream.write(addFile.readBytes())
+            var subFile = File(rootFile, data[i].title)
+            if(subFile.exists()){
+                var suffix = 1
+                do {
+                    subFile = File(rootFile, data[i].title+suffix)
+                    suffix += 1
+                }while (subFile.exists())
+            }
+            subFile.mkdir()
+
+            File(subFile, "info.txt").writeText(createSharedTextData(data[i]))
+            for(subFileName in data[i].files){
+                val originFile = File(getBaseFile(Type.Activity,data[i].activityId), subFileName)
+                originFile.copyTo(File(subFile,originFile.name))
+            }
         }
-        zipOutputStream.closeEntry()
-        zipOutputStream.close()
-        Log.d("asdasd","${file.toString()}   ${file.exists()}")
+        rootFile
+    }
+    suspend fun createSharedPortfolio(data: List<Portfolio>,
+                                      fileName: String, activityData:Map<Int,List<Activitys>>,
+                                      questionData:Map<Int,List<Question>>):File = withContext(Dispatchers.IO){
+        val rootFile = File(context.externalCacheDir, fileName)
+        rootFile.deleteOnExit()
+        rootFile.mkdir()
+        for(i in data.indices){
+            val subFileName = data[i].title.substring(0,data[i].title.lastIndexOf("."))
+            var subFile = File(rootFile, subFileName)
+            if(subFile.exists()){
+                var suffix = 1
+                do {
+                    subFile = File(rootFile, subFileName+suffix)
+                    suffix += 1
+                }while (subFile.exists())
+            }
+            subFile.mkdir()
+
+            if(!data[i].content.isNullOrBlank())
+                File(subFile, "info.txt").writeText(createSharedTextData(data[i]))
+
+            activityData.getOrDefault(data[i].portfolioId,null)?.let {
+                createSharedActivitys(it, "$fileName/${subFile.name}/${context.getString(R.string.tab_activity)}")
+            }
+            questionData.getOrDefault(data[i].portfolioId,null)?.let {
+                createSharedQuestion(it, "$fileName/${subFile.name}/${context.getString(R.string.tab_qna)}.txt")
+            }
+            val originFile = File(getBaseFile(Type.Resume,null), data[i].title)
+            originFile.copyTo(File(subFile,originFile.name))
+        }
+        rootFile
+    }
+    // 관련 문답은 한 파일에 몰아 쓴 형식
+    suspend fun createSharedQuestion(data: List<Question>, fileName: String):File = withContext(Dispatchers.IO){
+        val file = File(context.externalCacheDir, fileName)
+        file.deleteOnExit()
+        val stream = file.outputStream()
+        for(i in 0 until data.size-1){
+            stream.write(createSharedTextData(data[i]).toByteArray())
+            stream.write("\n".toByteArray())
+            stream.write("-----".repeat(6).toByteArray()) // divider
+            stream.write("\n".toByteArray())
+        }
+        stream.write(createSharedTextData(data.last()).toByteArray())
+        stream.close()
         file
     }
-    suspend fun makeZipFolder(){
+    suspend fun makeZipFolder(targetFile: File):File = withContext(Dispatchers.IO){
+        val zipFile = File(context.externalCacheDir, targetFile.name + ".zip")
+        val zipOutputStream = ZipOutputStream(zipFile.outputStream())
+        makeZipEntry(zipOutputStream, targetFile, "")
+        zipOutputStream.close()
+        targetFile.delete()
+        zipFile
+    }
+    private suspend fun makeZipEntry(zipOutputStream: ZipOutputStream,targetFile: File, parentPath: String):Unit = coroutineScope{
+        val path =  if(parentPath.isBlank()) "" else "$parentPath/"
 
+        if(targetFile.isDirectory){
+            targetFile.listFiles()?.let {
+                for(child in it){
+                    makeZipEntry(zipOutputStream, child, path + targetFile.name)
+                }
+            }
+        }else{
+            zipOutputStream.putNextEntry(ZipEntry(path + targetFile.name))
+            targetFile.inputStream().copyTo(zipOutputStream)
+            zipOutputStream.closeEntry()
+        }
+
+        targetFile.delete()
     }
 
     /** view intent */
@@ -284,7 +354,7 @@ class FileUtil @Inject constructor(@ApplicationContext private val context: Cont
             is Activitys ->{
                 "${context.getString(R.string.add_activity_title_short)} : ${data.title}\n" +
                         "${context.getString(R.string.category)} : ${context.resources.getStringArray(R.array.activityCategoryString)[data.type]}\n" +
-                        "${context.getString(R.string.date_short)} : ${data.title} ~ " +
+                        "${context.getString(R.string.date_short)} : ${data.startDate} ~ " +
                         if(data.endDate != null) "${data.endDate}\n" else "\n" +
                         if(data.content != null) "${context.getString(R.string.add_content_short)} : ${data.content}" else ""
             }

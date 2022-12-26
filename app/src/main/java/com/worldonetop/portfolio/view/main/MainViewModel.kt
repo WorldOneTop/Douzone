@@ -13,7 +13,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(var repository: Repository) : ViewModel() {
     companion object{
-        enum class Type{
+        enum class EventType{
             NONE, DELETE, SHARE
         }
     }
@@ -24,7 +24,7 @@ class MainViewModel @Inject constructor(var repository: Repository) : ViewModel(
 
     val selectMode: MutableLiveData<Boolean> = MutableLiveData(false)
 
-    val eventFloatingBtn: MutableLiveData<Type> = MutableLiveData(Type.NONE)
+    val eventFloatingBtn: MutableLiveData<EventType> = MutableLiveData(EventType.NONE)
 
 
     // 각 탭의 리스트 데이터

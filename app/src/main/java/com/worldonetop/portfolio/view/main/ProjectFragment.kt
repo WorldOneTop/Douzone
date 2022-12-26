@@ -7,14 +7,18 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.worldonetop.portfolio.BuildConfig
 import com.worldonetop.portfolio.R
 import com.worldonetop.portfolio.base.BaseFragment
 import com.worldonetop.portfolio.data.model.Activitys
@@ -45,6 +49,7 @@ class ProjectFragment : BaseFragment<FragmentPagerBinding>(R.layout.fragment_pag
     private lateinit var loadingDialog: Dialog
 
     private lateinit var rvAdapter: ProjectAdapter
+    private lateinit var sharedFileLauncher: ActivityResultLauncher<Intent>
 
     override fun initData() {
         // paging adapter
@@ -108,7 +113,7 @@ class ProjectFragment : BaseFragment<FragmentPagerBinding>(R.layout.fragment_pag
             if(!rvAdapter.isSelectedMode())
                 return@observe
             when(it){
-                MainViewModel.Companion.Type.DELETE ->{
+                MainViewModel.Companion.EventType.DELETE ->{
                         loadingDialog.show()
                         CoroutineScope(Dispatchers.IO).launch {
                             val removeData = repository.getActivitysSelected(rvAdapter.getSelectedIds())
@@ -119,17 +124,36 @@ class ProjectFragment : BaseFragment<FragmentPagerBinding>(R.layout.fragment_pag
                             }
                             withContext(Dispatchers.Main){
                                 viewModel.selectMode.value = false
-                                viewModel.eventFloatingBtn.value = MainViewModel.Companion.Type.NONE
+                                viewModel.eventFloatingBtn.value = MainViewModel.Companion.EventType.NONE
                                 loadingDialog.dismiss()
 
                             }
                         }
                 }
-                MainViewModel.Companion.Type.SHARE ->{
-                    viewModel.eventFloatingBtn.value = MainViewModel.Companion.Type.NONE
+                MainViewModel.Companion.EventType.SHARE ->{
+                    loadingDialog.show()
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val shareData = repository.getActivitysSelected(rvAdapter.getSelectedIds())
+                        val file = fileUtil.makeZipFolder(fileUtil.createSharedActivitys(shareData, getString(R.string.tab_activity)))
+                        val uriToFile = FileProvider.getUriForFile(requireContext(), BuildConfig.APPLICATION_ID + ".fileprovider", file)
+                        withContext(Dispatchers.Main){
+                            loadingDialog.dismiss()
+                            viewModel.eventFloatingBtn.value = MainViewModel.Companion.EventType.NONE
+                            val shareIntent: Intent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_STREAM, uriToFile)
+                                type = "application/zip"
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            }
+                            sharedFileLauncher.launch(Intent.createChooser(shareIntent, "share"))
+                        }
+                    }
                 }
                 else ->{}
             }
+        }
+        sharedFileLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
+            CoroutineScope(Dispatchers.IO).launch{ fileUtil.removeShasredData(getString(R.string.tab_activity)) }
         }
     }
 }
