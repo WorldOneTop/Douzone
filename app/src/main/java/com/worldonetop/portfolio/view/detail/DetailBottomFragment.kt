@@ -16,6 +16,7 @@ import com.bumptech.glide.Glide
 import com.worldonetop.portfolio.R
 import com.worldonetop.portfolio.base.BaseFragment
 import com.worldonetop.portfolio.data.model.LinkInfo
+import com.worldonetop.portfolio.data.source.Repository
 import com.worldonetop.portfolio.databinding.FragmentDetailBottomBinding
 import com.worldonetop.portfolio.databinding.RowBottomSheetBinding
 import com.worldonetop.portfolio.util.CustomDialog
@@ -36,6 +37,7 @@ class DetailBottomFragment: BaseFragment<FragmentDetailBottomBinding>(R.layout.f
 
     private lateinit var loadingDialog: Dialog
     @Inject lateinit var fileUtil: FileUtil
+    @Inject lateinit var repository: Repository
 
     private lateinit var addActivityAdapter: AddActivityAdapter
     private lateinit var getFileLauncher: ActivityResultLauncher<String>
@@ -126,6 +128,9 @@ class DetailBottomFragment: BaseFragment<FragmentDetailBottomBinding>(R.layout.f
                         }
                     },{ // item selected mode
                     },{ // like click
+                        CoroutineScope(Dispatchers.IO).launch {
+                            repository.updateActivitys(it)
+                        }
                     }
                 )
                 binding.rvBtm.adapter = projectAdapter
@@ -152,6 +157,9 @@ class DetailBottomFragment: BaseFragment<FragmentDetailBottomBinding>(R.layout.f
                         }
                     },{ // item selected mode
                     },{ // like click
+                        CoroutineScope(Dispatchers.IO).launch {
+                            repository.updateQuestion(it)
+                        }
                     }
                 )
                 binding.rvBtm.adapter = questionAdapter
@@ -299,6 +307,15 @@ class AddActivityAdapter(
             CoroutineScope(Dispatchers.IO).launch {
                 fileUtil.getLinkInfo(item)?.let {
                     linkInfo[item] = it
+                    withContext(Dispatchers.Main){
+                        data.filterIndexed{ index, s ->  
+                            if(s==item){
+                                notifyItemChanged(index)
+                                return@filterIndexed true
+                            }
+                            false
+                        }
+                    }
                 }
             }
         }

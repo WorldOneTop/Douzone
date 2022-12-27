@@ -57,13 +57,13 @@ class DetailViewModel @Inject constructor(var repository: Repository):ViewModel(
                     if(it)
                         repository.getActivitysAll().cachedIn(viewModelScope)
                     else
-                        repository.getActivitysQuery(portfolioData?.activity ?: listOf()).cachedIn(viewModelScope)
+                        repository.getActivitysQuery(this.portfolioData.activity).cachedIn(viewModelScope)
                 }
                 pagingQuestion = Transformations.switchMap(editMode){
                     if(it)
                         repository.getQuestionAll().cachedIn(viewModelScope)
                     else
-                        repository.getQuestionQuery(portfolioData?.question ?: listOf()).cachedIn(viewModelScope)
+                        repository.getQuestionQuery(this.portfolioData.question).cachedIn(viewModelScope)
                 }
             }
             2 ->{

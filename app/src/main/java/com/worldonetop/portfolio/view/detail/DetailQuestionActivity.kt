@@ -64,12 +64,12 @@ class DetailQuestionActivity : BaseActivity<ActivityDetailQuestionBinding>(R.lay
         }
     }
     private fun formCheck():Boolean{
-        if(viewModel.questionData.answer.isBlank()){
+        if(viewModel.questionData.question.isBlank()){
             binding.title.error = getString(R.string.error_no_input)
             return false
         }
 
-        if(viewModel.questionData.question.isBlank()){
+        if(viewModel.questionData.answer.isBlank()){
             binding.content.error = getString(R.string.error_no_input)
             return false
         }

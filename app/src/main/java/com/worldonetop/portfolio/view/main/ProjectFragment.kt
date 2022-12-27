@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -252,9 +253,7 @@ class ProjectAdapter(private val clickListener:(data:Activitys, View:RowProjectB
                 setLikeLayout(it.like)
 
                 isSelect = select
-                isSelect?.let { s ->
-                    setSelectedLayout(s)
-                }
+                setSelectedLayout(select ?: false)
 
                 // listener
                 binding.root.setOnClickListener{_ ->

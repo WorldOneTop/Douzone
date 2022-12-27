@@ -249,9 +249,7 @@ class PortfolioAdapter(private val clickListener:(data:Portfolio, view:RowPortfo
                 setLikeLayout(it.like)
 
                 isSelect = select
-                isSelect?.let { s ->
-                    setSelectedLayout(s)
-                }
+                setSelectedLayout(select ?: false)
                 // listener
                 binding.root.setOnClickListener{_ ->
                     if(isSelect != null){

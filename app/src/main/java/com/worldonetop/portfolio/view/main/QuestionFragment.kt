@@ -240,9 +240,7 @@ class QuestionAdapter(
                 setLikeLayout(it.like)
 
                 isSelect = select
-                isSelect?.let { s ->
-                    setSelectedLayout(s)
-                }
+                setSelectedLayout(select ?: false)
 
                 // listener
                 binding.root.setOnClickListener{ _ ->
