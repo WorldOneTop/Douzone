@@ -2,7 +2,7 @@
 > 프로젝트, 경력 등 포트폴리오 관련 자료들을 저장 및 관리, 공유  
 > 관련 링크: <a href = "https://github.com/WorldOneTop/Douzone/blob/master/%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8%20%EB%B0%9C%ED%91%9C%EC%9E%90%EB%A3%8C.pptx">프젝 PPT</a>   
 
-<img src="https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=Android&logoColor=white"> <img src="https://img.shields.io/badge/kotlin-7F52FF?style=for-the-badge&logo=Gradle&logoColor=white"> <img src="https://img.shields.io/badge/sqlite-003B57?style=for-the-badge&logo=Android&logoColor=white"> 
+<img src="https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=Android&logoColor=white"> <img src="https://img.shields.io/badge/kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white"> <img src="https://img.shields.io/badge/sqlite-003B57?style=for-the-badge&logo=sqlite&logoColor=white"> 
 
 ![image](https://user-images.githubusercontent.com/45085513/233846020-dd564425-9edf-426a-9d27-e63dad65e4d8.png)
 
